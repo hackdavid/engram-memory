@@ -10,14 +10,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![LiteLLM](https://img.shields.io/badge/LLM-LiteLLM-111111?style=flat)](https://github.com/BerriAI/litellm)
 [![Neo4j](https://img.shields.io/badge/graph-Neo4j-008CC1?style=flat&logo=neo4j&logoColor=white)](https://neo4j.com/)
+[![Docs](https://img.shields.io/badge/docs-GitHub-24292f?style=flat&logo=github)](https://github.com/hackdavid/Engram/tree/main/docs)
 
 **Ingest once with the LLM → recall with graph + vectors + scoring — no LLM on the read path.**
 
 🧠 **Structured** · ⚡ **Async-first** · 🔌 **100+ models via [LiteLLM](https://docs.litellm.ai/)** · 🛡️ **Decay, cache, rate limits** · 🚀 **Production-minded**
 
-[Why Engram](#why-engram-next-generation-memory) · [Verify LiteLLM](#verify-your-model-with-litellm-first) · [Install](#installation) · [Quick start](#quick-start) · [Contributing](#contributing) · [License](#license)
+📖 **[Developer docs](https://github.com/hackdavid/Engram/tree/main/docs)** · **[GitHub](https://github.com/hackdavid/Engram)** · **[Issues](https://github.com/hackdavid/Engram/issues)**
 
-
+[Why Engram](#why-engram-next-generation-memory) · [Docs](#documentation) · [Verify LiteLLM](#verify-your-model-with-litellm-first) · [Install](#installation) · [Quick start](#quick-start) · [Contributing](#contributing) · [License](#license)
 
 </div>
 
@@ -35,6 +36,20 @@ Most agent memory is a **flat pile of chunks** or a **single vector index**. Tha
 | Rigid schema | Doesn’t fit every domain | **Schema emerges at runtime** from structured JSON extraction |
 
 Engram is built for **multi-step agents, copilots, and long-running workflows**: isolated `user_id` namespaces, hooks for audit/telemetry, health checks, and a CLI smoke test (`engram-e2e`) you can run in CI against a real database.
+
+## Documentation
+
+Developer-focused guides live under [`docs/`](docs/):
+
+| Guide | Topics |
+|-------|--------|
+| [Documentation home](docs/README.md) | Index, links, orientation |
+| [Getting started](docs/getting-started.md) | Install, LiteLLM check, first `ingest` / `recall` |
+| [Configuration](docs/configuration.md) | Environment variables, `Config`, `user_id` pattern |
+| [API overview](docs/api-overview.md) | Clients, models, exceptions |
+| [Production & operations](docs/production.md) | Health, `engram-e2e`, live tests, logging |
+
+On **PyPI**, the package metadata includes a **Documentation** URL that points to the same [`docs/` tree on GitHub](https://github.com/hackdavid/Engram/tree/main/docs).
 
 ---
 

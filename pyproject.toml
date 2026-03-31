@@ -58,10 +58,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/dauddewan/engram"
-Documentation = "https://github.com/dauddewan/engram#readme"
-Repository = "https://github.com/dauddewan/engram"
-Issues = "https://github.com/dauddewan/engram/issues"
+Homepage = "https://github.com/hackdavid/Engram"
+Documentation = "https://github.com/hackdavid/Engram/tree/main/docs"
+Repository = "https://github.com/hackdavid/Engram"
+Issues = "https://github.com/hackdavid/Engram/issues"
 
 [tool.hatch.version]
 path = "engram/_version.py"
