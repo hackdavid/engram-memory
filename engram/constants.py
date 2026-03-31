@@ -1,0 +1,40 @@
+"""Engram SDK constants and default values."""
+
+SDK_SCHEMA_VERSION: int = 1
+
+# Composite scoring defaults
+DEFAULT_SCORE_ALPHA: float = 0.5
+DEFAULT_SCORE_BETA: float = 0.35
+DEFAULT_SCORE_GAMMA: float = 0.15
+
+# Traversal defaults
+DEFAULT_TRAVERSAL_DECAY: float = 0.5
+DEFAULT_TRAVERSAL_MAX_DEPTH: int = 5
+DEFAULT_TRAVERSAL_MIN_SCORE: float = 0.1
+
+# Cache defaults
+DEFAULT_CACHE_MAX_SIZE: int = 100
+DEFAULT_CACHE_TTL_SECONDS: int = 300
+
+# Background task defaults
+DEFAULT_DECAY_INTERVAL_HOURS: int = 24
+DEFAULT_HIERARCHY_REBUILD_INTERVAL_HOURS: int = 6
+DEFAULT_WEIGHT_LEARNING_INTERVAL_HOURS: int = 12
+DEFAULT_DECAY_FACTOR: float = 0.95
+DEFAULT_ARCHIVE_THRESHOLD: float = 0.01
+
+# Neo4j defaults
+DEFAULT_NEO4J_DATABASE: str = "neo4j"
+DEFAULT_NEO4J_MAX_POOL_SIZE: int = 50
+
+# LLM defaults
+DEFAULT_LLM_MAX_RETRIES: int = 3
+DEFAULT_LLM_RATE_LIMIT_RPM: int = 60
+DEFAULT_LLM_RATE_LIMIT_BURST: int = 10
+
+# Embedding defaults
+DEFAULT_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+DEFAULT_EMBEDDING_DIMENSIONS: int = 384
+
+# Validation
+DEFAULT_USER_ID_PATTERN: str = r"^[a-zA-Z0-9_-]{1,128}$"

@@ -1,0 +1,8 @@
+neo4j>=5.0
+pydantic
+pydantic-settings>=2.0
+litellm>=1.30
+
+# Dev
+pytest>=8.0
+pytest-asyncio>=0.23
