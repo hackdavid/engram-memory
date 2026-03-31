@@ -47,7 +47,7 @@ Developer-focused guides live under [`docs/`](docs/):
 | [Getting started](docs/getting-started.md) | Install, LiteLLM check, first `ingest` / `recall` |
 | [Configuration](docs/configuration.md) | Environment variables, `Config`, `user_id` pattern |
 | [API overview](docs/api-overview.md) | Clients, models, exceptions |
-| [Production & operations](docs/production.md) | Health, `engram-e2e`, live tests, logging |
+| [Production & operations](docs/production.md) | Health, `engram-e2e`, logging |
 
 On **PyPI**, the package metadata includes a **Documentation** URL that points to the same [`docs/` tree on GitHub](https://github.com/hackdavid/Engram/tree/main/docs).
 
@@ -104,73 +104,58 @@ Use the **exact** model id (and `api_base` / `api_version` if required) in your 
 
 ## 📦 Installation
 
+**PyPI release is in progress.** Until the package is published, install from this repository:
+
 ```bash
-# Core (Neo4j + Pydantic + LiteLLM)
+git clone https://github.com/hackdavid/Engram.git
+cd Engram
+pip install -e .
+```
+
+When Engram is on PyPI, a normal install will be:
+
+```bash
 pip install engram
-
-# With OpenAI embeddings
-pip install engram[openai-embed]
-
-# With local embeddings (SentenceTransformers)
-pip install engram[local-embed]
-
-# Everything
-pip install engram[all]
-
-# Development
-pip install engram[dev]
 ```
 
-Console entry point for production smoke tests: **`engram-e2e`** (see below).
+(PyPI treats the name as case-insensitive, so `pip install Engram` will be equivalent.)
 
-## Live integration tests (optional)
-
-These tests hit **real Neo4j and your LLM** (paid API usage, graph writes). They are **skipped by default**.
-
-1. Put credentials in a repo-root `.env` and/or [`engram/.env`](engram/.env) (see [`.env.example`](.env.example)).
-2. Set `ENGRAM_LIVE_TESTS=1` in that file **or** export it in your shell. When you run `pytest tests/test_live_e2e.py` (or `pytest -m live` with marker exactly `live`), `tests/conftest.py` loads those dotenv files if the flag is on—so the shell export is optional. Running `pytest tests/` alone does **not** load `.env`, so unit tests stay clean.
-3. Install embeddings: `pip install engram[local-embed]` for the default local embedder, or set `EMBEDDING_PROVIDER=openai` and `EMBEDDING_API_KEY`.
-4. Run:
-
-```bash
-# bash
-export ENGRAM_LIVE_TESTS=1
-pytest tests/test_live_e2e.py -m live
-```
-
-```powershell
-$env:ENGRAM_LIVE_TESTS = "1"
-pytest tests/test_live_e2e.py -m live
-```
-
-Each test uses a unique `userId` and **deletes** its nodes in teardown.
-
-### Neo4j connectivity only (sync driver)
-
-To verify Aura or local Neo4j without the full SDK:
-
-```bash
-python scripts/neo4j_verify_connectivity.py
-```
-
-Uses `NEO4J_URI`, `NEO4J_USER`, and `NEO4J_PASSWORD` from `.env` / `engram/.env`.
+Either path installs the **runtime stack**: Neo4j driver, Pydantic, LiteLLM, and **local embeddings** (SentenceTransformers + PyTorch) for `EMBEDDING_PROVIDER=local` (the default). If you use **`EMBEDDING_PROVIDER=openai`**, add the OpenAI SDK: `pip install engram[openai-embed]` (after PyPI) or `pip install -e ".[openai-embed]"` from a clone.
 
 ## End-to-end validation (production smoke)
 
-After `pip install engram[local-embed]` (or OpenAI embeddings configured), run from a directory that contains `.env` / `engram/.env`:
+Run from a directory that has `.env` or `engram/.env` configured (see [`.env.example`](.env.example)). Install first with `pip install -e .` from a clone, or from PyPI when it is available.
 
-```bash
-engram-e2e
-# or
-python -m engram.cli.e2e_validate
-```
+### How to run
 
-- **Default:** runs health checks, then **five sequential ingests** (one LLM call each) with **per-ingest elapsed time** logged, then ten recall/search scenarios and a graph snapshot.
-- **Retrieval only** (no writes): `engram-e2e --skip-seed --user-id <existing_user_id>` (or set `E2E_USER_ID`).
-- **Single batched ingest:** `engram-e2e --batch-seed` (one LLM call for all seed paragraphs).
-- **Timeouts:** `E2E_LLM_TIMEOUT_SEC` (default 120), `E2E_INGEST_TIMEOUT_SEC` (default LLM timeout + 45s).
+| Use case | Command |
+|----------|---------|
+| **Default (recommended)** | `python -m engram.cli.e2e_validate` |
+| Same, from a Windows clone | `scripts\engram-e2e.cmd` (repo root) |
+| Pip console script (if on `PATH`) | `engram-e2e` |
+| Clone, package not installed | `python scripts/e2e_validate.py` |
 
-From a git clone without installing the package: `python scripts/e2e_validate.py`.
+On **Windows**, `engram-e2e` often fails with “not recognized” because Python’s **Scripts** folder is not on `PATH`. Prefer the **`python -m …`** row above, or add that `Scripts` directory to `PATH` (conda env, `%LocalAppData%\Programs\Python\Python3xx\Scripts`, etc.).
+
+### What the default run does
+
+1. Health checks  
+2. **Five sequential ingests** (one LLM call each), with per-ingest timing logged  
+3. Ten recall / search scenarios and a graph snapshot  
+
+### Flags and timeouts
+
+| Goal | How |
+|------|-----|
+| Retrieval only (no writes) | `python -m engram.cli.e2e_validate --skip-seed --user-id <id>` or set `E2E_USER_ID` |
+| One LLM call for all seed text | `--batch-seed` |
+| Tune wall-clock limits | `E2E_LLM_TIMEOUT_SEC` (default `120`), `E2E_INGEST_TIMEOUT_SEC` (default LLM timeout + 45s) |
+
+More options: `python -m engram.cli.e2e_validate --help`.
+
+### Neo4j-only check
+
+Bolt connectivity without the full SDK or LLM: `python scripts/neo4j_verify_connectivity.py` (same Neo4j env vars).
 
 ## Quick Start
 
@@ -661,7 +646,7 @@ engram/
 Engram is **open source**. We want you to **use it in production**, **report rough edges**, and **ship improvements**.
 
 - **Issues** — bugs, design questions, or provider-specific LiteLLM quirks (include model id, env vars you set, and redacted logs).
-- **Pull requests** — keep changes focused; add or extend **tests** (`pytest tests/ -v`); match existing style and typing.
+- **Pull requests** — keep changes focused; add or extend **tests**; clone the repo and use `pip install -e ".[dev]"` for pytest/ruff, then `pytest tests/ -v`. Match existing style and typing.
 - **New LLM backends** — the supported integration is **`LiteLLMAdapter`**. If you need a path LiteLLM does not cover, open an issue first; we welcome clean adapters that follow `engram/llm/base.py` and include tests with mocks.
 
 Thank you for helping make agent memory **structured, fast, and boringly reliable**.

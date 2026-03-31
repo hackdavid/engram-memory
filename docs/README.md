@@ -5,7 +5,7 @@
 | Resource | Link |
 |----------|------|
 | **Repository** | [github.com/hackdavid/Engram](https://github.com/hackdavid/Engram) |
-| **Package (PyPI)** | `pip install engram` — project links on PyPI point back here |
+| **Install** | Clone [hackdavid/Engram](https://github.com/hackdavid/Engram) and `pip install -e .` until PyPI release; then `pip install engram` |
 | **License** | [MIT](https://github.com/hackdavid/Engram/blob/main/LICENSE) |
 
 ## Documentation map

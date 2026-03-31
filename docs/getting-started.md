@@ -8,20 +8,19 @@
 
 ## Install
 
+**PyPI release is in progress.** For now, clone and install in editable mode:
+
 ```bash
-# Core: Neo4j driver, Pydantic, LiteLLM
-pip install engram
-
-# Pick at least one embedding path
-pip install engram[local-embed]    # SentenceTransformers (default-friendly)
-# or
-pip install engram[openai-embed]  # OpenAI embeddings API
-
-# All optional extras
-pip install engram[all]
+git clone https://github.com/hackdavid/Engram.git
+cd Engram
+pip install -e .
 ```
 
-For contributors: `pip install -e ".[dev]"` from a clone of [hackdavid/Engram](https://github.com/hackdavid/Engram).
+When the package is published: `pip install engram` (same as `pip install Engram` on PyPI).
+
+The install includes **local embeddings** (SentenceTransformers + PyTorch) for the default `EMBEDDING_PROVIDER=local`. For **`EMBEDDING_PROVIDER=openai`**, also run `pip install -e ".[openai-embed]"` from the clone (or `pip install engram[openai-embed]` after PyPI).
+
+**Contributors** working from a git clone: `pip install -e ".[dev]"` (pytest, ruff, etc.).
 
 ## Verify LiteLLM before Engram
 

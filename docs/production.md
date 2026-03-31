@@ -10,43 +10,28 @@ status = await client.health_check(ping_llm=True)
 
 Interpret flags on `HealthStatus` (Neo4j connectivity, embedder loaded, vector index, schema version, LLM reachability).
 
-## Smoke test CLI (`engram-e2e`)
+## Smoke test CLI
 
-After installing extras for embeddings (`engram[local-embed]` or OpenAI embeddings configured):
+Configure `.env` / `engram/.env`, then install from the repo (`pip install -e .`) or PyPI when available.
 
-```bash
-engram-e2e
-# equivalent:
-python -m engram.cli.e2e_validate
-```
+| Use case | Command |
+|----------|---------|
+| Recommended | `python -m engram.cli.e2e_validate` |
+| Windows clone helper | `scripts\engram-e2e.cmd` |
+| Pip script (if on `PATH`) | `engram-e2e` |
+| No package install | `python scripts/e2e_validate.py` |
 
-From a clone without installing the package: `python scripts/e2e_validate.py`.
+On Windows, prefer `python -m …` if `engram-e2e` is not found (Scripts not on `PATH`).
 
-Useful flags (see `--help` in your installed version):
+| Flag / env | Purpose |
+|------------|---------|
+| `--skip-seed` + `--user-id` or `E2E_USER_ID` | Retrieval-only smoke |
+| `--batch-seed` | One LLM call for bundled seed content |
+| `E2E_LLM_TIMEOUT_SEC`, `E2E_INGEST_TIMEOUT_SEC` | Wall-clock guardrails |
 
-- **`--skip-seed`** — retrieval-only against an existing `user_id`
-- **`--batch-seed`** — one LLM call for bundled seed content
-- Environment **`E2E_LLM_TIMEOUT_SEC`**, **`E2E_INGEST_TIMEOUT_SEC`** — wall-clock guardrails
+Run in CI against a dedicated Neo4j instance. Full options: `--help`.
 
-Run this in CI against a dedicated Neo4j instance to catch regressions in graph writes and recall.
-
-## Live integration tests (optional)
-
-These tests exercise **real Neo4j + real LLM** (cost and side effects). They are **off** unless you opt in.
-
-1. Configure `.env` / `engram/.env`.
-2. Set **`ENGRAM_LIVE_TESTS=1`**.
-3. Run: `pytest tests/test_live_e2e.py -m live`
-
-See the [README section on live tests](https://github.com/hackdavid/Engram/blob/main/README.md#live-integration-tests-optional) for shell examples and cleanup behaviour.
-
-## Neo4j connectivity only
-
-To verify Bolt credentials without the full SDK:
-
-```bash
-python scripts/neo4j_verify_connectivity.py
-```
+**Bolt only (no LLM):** `python scripts/neo4j_verify_connectivity.py` with Neo4j env vars set.
 
 ## Logging
 

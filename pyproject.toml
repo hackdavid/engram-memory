@@ -34,6 +34,8 @@ dependencies = [
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
     "litellm>=1.30",
+    "sentence-transformers>=2.0",
+    "torch",
 ]
 
 [project.scripts]
@@ -41,11 +43,11 @@ engram-e2e = "engram.cli.e2e_validate:main"
 
 [project.optional-dependencies]
 openai-embed = ["openai>=1.0"]
+# Backward compatible no-op: local embeddings ship with the core package.
 local-embed = ["sentence-transformers>=2.0", "torch"]
 observability = ["opentelemetry-api>=1.0"]
 all = [
     "engram[openai-embed]",
-    "engram[local-embed]",
     "engram[observability]",
 ]
 dev = [

@@ -2,6 +2,8 @@ neo4j>=5.0
 pydantic
 pydantic-settings>=2.0
 litellm>=1.30
+sentence-transformers>=2.0
+torch
 
 # Dev
 pytest>=8.0

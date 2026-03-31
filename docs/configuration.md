@@ -30,7 +30,7 @@ The wired adapter is **`LiteLLMAdapter`** (`engram/llm/litellm_adapter.py`). Oth
 
 | Variable | Default | Notes |
 |----------|---------|--------|
-| `EMBEDDING_PROVIDER` | `local` | `local` (SentenceTransformers) or `openai` |
+| `EMBEDDING_PROVIDER` | `local` | `local` (SentenceTransformers, bundled with `pip install engram`) or `openai` (add `pip install engram[openai-embed]`) |
 | `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Must match dimension below for existing indexes |
 | `EMBEDDING_DIMENSIONS` | `384` | Must match the vector index in Neo4j |
 | `EMBEDDING_API_KEY` | — | For `openai` provider |
