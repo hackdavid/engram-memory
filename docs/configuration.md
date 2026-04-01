@@ -112,4 +112,4 @@ Environment variables still override if you use `model_config` defaults from `Ba
 
 ## Full table
 
-For a single-page dump of every variable, see the **Configuration Reference** section in the [main README](https://github.com/hackdavid/Engram/blob/main/README.md#configuration-reference).
+For a single-page dump of every variable, see the **Configuration Reference** section in the [main README](https://github.com/hackdavid/engram-memory/blob/main/README.md#configuration-reference).

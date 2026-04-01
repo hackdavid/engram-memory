@@ -228,7 +228,7 @@ fig.text(0.06, 0.012,
          f'Corpus: {data["summary"]["corpus_size"]} docs  |  '
          f'Total cost: ${data["summary"]["estimated_cost_usd"]:.2f}',
          fontsize=8, color=TEXT_DIM, fontfamily="monospace", va="bottom")
-fig.text(0.97, 0.012, "github.com/engram-memory",
+fig.text(0.97, 0.012, "github.com/hackdavid/engram-memory",
          fontsize=8, color=ACCENT, fontfamily="monospace",
          ha="right", va="bottom", alpha=0.7)
 

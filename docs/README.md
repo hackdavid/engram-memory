@@ -4,9 +4,9 @@
 
 | Resource | Link |
 |----------|------|
-| **Repository** | [github.com/hackdavid/Engram](https://github.com/hackdavid/Engram) |
-| **Install** | Clone [hackdavid/Engram](https://github.com/hackdavid/Engram) and `pip install -e .` until PyPI release; then `pip install engram_memory` |
-| **License** | [MIT](https://github.com/hackdavid/Engram/blob/main/LICENSE) |
+| **Repository** | [github.com/hackdavid/engram-memory](https://github.com/hackdavid/engram-memory) |
+| **Install** | Clone [hackdavid/engram-memory](https://github.com/hackdavid/engram-memory) and `pip install -e .` until PyPI release; then `pip install engram_memory` |
+| **License** | [MIT](https://github.com/hackdavid/engram-memory/blob/main/LICENSE) |
 
 ## Documentation map
 
@@ -17,7 +17,7 @@
 | [API overview](api-overview.md) | Clients, models, exceptions, async vs sync |
 | [Production & operations](production.md) | Health checks, `engram_memory-e2e`, live tests, hooks, logging |
 
-The [root README](https://github.com/hackdavid/Engram/blob/main/README.md) remains the high-level product overview, feature list, and full configuration table.
+The [root README](https://github.com/hackdavid/engram-memory/blob/main/README.md) remains the high-level product overview, feature list, and full configuration table.
 
 ## Quick orientation
 

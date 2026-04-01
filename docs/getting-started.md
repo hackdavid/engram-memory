@@ -11,8 +11,8 @@
 **PyPI release is in progress.** For now, clone and install in editable mode:
 
 ```bash
-git clone https://github.com/hackdavid/Engram.git
-cd Engram
+git clone https://github.com/hackdavid/engram-memory.git
+cd engram-memory
 pip install -e .
 ```
 
@@ -35,7 +35,7 @@ If this fails, fix provider credentials or model id before setting `LLM_MODEL` a
 
 ## Minimal environment
 
-Create `.env` at the repo root or under `engram_memory/.env` (see [.env.example](https://github.com/hackdavid/Engram/blob/main/.env.example) in the repository). Minimum:
+Create `.env` at the repo root or under `engram_memory/.env` (see [.env.example](https://github.com/hackdavid/engram-memory/blob/main/.env.example) in the repository). Minimum:
 
 ```bash
 export NEO4J_URI="bolt://localhost:7687"
