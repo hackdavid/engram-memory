@@ -16,14 +16,13 @@ _ROOT = Path(__file__).resolve().parent.parent
 
 
 def _pytest_targets_live_e2e(argv: list[str]) -> bool:
-    """True when this pytest invocation is meant to run live E2E tests."""
+    """True when this pytest invocation is meant to run live E2E/benchmark tests."""
     joined = " ".join(argv)
-    if "test_live_e2e" in joined:
+    if "test_live_e2e" in joined or "test_live_benchmark" in joined:
         return True
     for i, a in enumerate(argv):
         if a == "-m" and i + 1 < len(argv):
             expr = argv[i + 1].strip()
-            # Only exact marker `live` — avoid matching `not live` on full suite runs.
             if expr == "live":
                 return True
     return False

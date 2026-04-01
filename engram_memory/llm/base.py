@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import time
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -13,12 +12,15 @@ from engram_memory.exceptions import CircuitOpenError, ExtractionError
 
 logger = logging.getLogger(__name__)
 
+_ZERO_USAGE: dict[str, int] = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
 
 class BaseLLM(ABC):
     """Interface that all Engram LLM providers must implement.
 
-    Subclasses implement _call(). This base class provides retry with
-    exponential backoff and a circuit breaker.
+    Subclasses implement _call() returning (content, usage_dict). This base
+    class provides retry with exponential backoff and a circuit breaker, and
+    exposes last_usage so callers can track token consumption.
     """
 
     def __init__(
@@ -32,15 +34,28 @@ class BaseLLM(ABC):
         self._base_delay = base_delay
         self._consecutive_failures = 0
         self._circuit_open = False
+        self._last_usage: dict[str, int] = dict(_ZERO_USAGE)
+
+    @property
+    def last_usage(self) -> dict[str, int]:
+        """Token counts from the most recent successful LLM call."""
+        return self._last_usage
 
     @abstractmethod
-    async def _call(self, system: str, user: str) -> str:
-        """Make the actual API call and return the raw text response."""
+    async def _call(self, system: str, user: str) -> tuple[str, dict[str, int]]:
+        """Make the actual API call.
+
+        Returns:
+            (content, usage) where usage has keys prompt_tokens,
+            completion_tokens, total_tokens.
+        """
 
     async def generate_json(
         self, system: str, user: str
     ) -> dict[str, Any]:
         """Call the LLM with retry, parse the response as JSON.
+
+        After a successful call, token counts are available via self.last_usage.
 
         Raises ExtractionError after exhausting retries.
         Raises CircuitOpenError if the breaker has tripped.
@@ -54,9 +69,10 @@ class BaseLLM(ABC):
         last_error: Exception | None = None
         for attempt in range(1, self._max_retries + 1):
             try:
-                raw = await self._call(system, user)
+                raw, usage = await self._call(system, user)
                 parsed = self._parse_json(raw)
                 self._consecutive_failures = 0
+                self._last_usage = usage
                 return parsed
             except Exception as exc:
                 last_error = exc

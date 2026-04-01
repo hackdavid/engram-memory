@@ -40,14 +40,16 @@ Changing model or dimensions on an existing database may require index migration
 
 ## Retrieval scoring & traversal
 
+Traversal uses a **single variable-length Cypher query** (`MATCH path = (seed)-[*1..N]-(m)`) instead of per-node BFS, collapsing the entire graph expansion into one Neo4j round-trip.
+
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `SCORE_ALPHA` | `0.50` | Weight for vector similarity |
 | `SCORE_BETA` | `0.35` | Weight for hop decay term |
 | `SCORE_GAMMA` | `0.15` | Weight for node strength |
-| `TRAVERSAL_DECAY` | `0.5` | Per-hop score multiplier during BFS |
+| `TRAVERSAL_DECAY` | `0.5` | Per-hop score multiplier (`score = decay^hops`) |
 | `TRAVERSAL_MAX_DEPTH` | `5` | Max graph hops from seed nodes |
-| `TRAVERSAL_MIN_SCORE` | `0.1` | Prune paths below this score |
+| `TRAVERSAL_MIN_SCORE` | `0.1` | Prune nodes with score below this threshold |
 
 ## Memory decay (background)
 

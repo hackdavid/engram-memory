@@ -90,6 +90,11 @@ Use the **exact** model id (and `api_base` / `api_version` if required) in your 
 ## ✨ Features
 
 - **1 LLM call to ingest · 0 LLM calls to recall** — extract structured graph once; retrieve with vectors + traversal + scoring
+- **Slim context, minimal tokens** — only node summaries and relationship types are sent to the LLM (~735 tokens/ingest avg), not raw properties or embeddings
+- **Token tracking & cost estimation** — every `IngestResult` includes `tokens_prompt`, `tokens_completion`, `tokens_total` for precise cost monitoring
+- **Batched Neo4j writes** — nodes grouped by label and relationships grouped by type, written via `UNWIND` queries to minimize round-trips
+- **Single-query graph traversal** — variable-length Cypher replaces per-node BFS; one round-trip regardless of graph size
+- **Update-aware extraction** — LLM is instructed to update existing entities instead of creating duplicates, preventing graph bloat
 - **Dynamic graph schema** — labels, properties, and relationship types from the model, not hand-maintained DDL
 - **Async-first** — `AsyncMemoryClient` + sync `MemoryClient` wrapper
 - **Composite ranking** — `α·vector_similarity + β·decay^hops + γ·strength`
@@ -200,18 +205,19 @@ from engram_memory import AsyncMemoryClient, Config
 async def main():
     config = Config()  # reads from environment variables
     async with AsyncMemoryClient(config) as client:
-        # await client.health_check(ping_llm=True)  # optional wiring check (LiteLLM ping)
+        # await client.health_check(ping_llm=True)  # optional wiring check
 
-        # Ingest a message
+        # Ingest a message (1 LLM call, batched Neo4j writes)
         result = await client.ingest(
             user_id="user-123",
             text="I work at Google as a senior engineer in the ML team.",
-            reference_id="msg-001",  # optional: link back to source message
+            reference_id="msg-001",
         )
         print(f"Created {len(result.nodes_created)} nodes, "
-              f"{result.relationships_created} relationships")
+              f"{result.relationships_created} relationships, "
+              f"{result.tokens_total} tokens used")
 
-        # Recall relevant context
+        # Recall relevant context (0 LLM calls)
         context = await client.recall(
             user_id="user-123",
             query="What does the user do for work?",
@@ -238,64 +244,88 @@ client.close()
 
 ### Ingestion Pipeline
 
+Every call to `ingest(text)` follows this optimised path:
+
 ```
 User text
-  │
-  ▼
-Trivial filter ──► skip ("hi", "ok", "thanks")
-  │
-  ▼
+  |
+  v
+Trivial filter ------> skip ("hi", "ok", "thanks")   [0 LLM calls]
+  |
+  v
 Rate limiter (token bucket)
-  │
-  ▼
-Fetch neighbourhood (existing nodes for this user)
-  │
-  ▼
-LLM extraction ──► NodeInstruction[] + RelInstruction[]
-  │                  (1 LLM call with structured JSON output)
-  ▼
-For each node:
-  ├─ Embed summary (SentenceTransformer or OpenAI)
-  ├─ Build parameterised Cypher (MERGE + SET)
-  ├─ Execute against Neo4j
-  └─ Assign to cluster (HierarchyManager)
-  │
-  ▼
-Build relationships (MERGE with traversal metadata)
-  │
-  ▼
+  |
+  v
+Step 1: embed(text) -> query_vector                   [1 embedder call, reused below]
+  |
+  v
+Step 2: vector_search(query_vector, top_k=5)          [1 Neo4j call]
+         returns: elementId, label, summary, rel_types
+         (NO raw properties, NO embeddings -- slim context)
+  |
+  v
+Step 3: build_user_prompt(text + slim context)
+         ~50-100 tokens for 5 context nodes
+  |
+  v
+Step 4: LLM extraction -> nodes[] + rels[]            [1 LLM call]
+         token usage captured for cost tracking
+  |
+  v
+Step 5: Batch node upsert (UNWIND per label group)    [~2 Neo4j calls]
+         reuse text embedding when summary == text
+  |
+  v
+Step 6: Batch relationship MERGE (UNWIND per type)    [~1 Neo4j call]
+         resolve temp_N -> real elementIds
+  |
+  v
 Invalidate user cache
-  │
-  ▼
-Return IngestResult
+  |
+  v
+Return IngestResult (with token counts)
 ```
 
-### Retrieval Pipeline
+**Key design decisions:**
+
+- **Embedding reuse** -- the text embedding from step 1 is used for both context lookup and node storage; fresh embeddings are only computed for nodes whose summary differs from the input text.
+- **Slim LLM context** -- only node summaries and relationship type names are sent to the LLM, keeping prompt tokens minimal (~735 tokens/ingest on GPT-4-32k in benchmarks).
+- **Batched writes** -- nodes are grouped by label and written via `UNWIND` queries; relationships are grouped by type. A typical 4-node + 3-relationship ingest uses ~4 Neo4j round-trips instead of 7.
+- **Update-aware extraction** -- the LLM prompt explicitly instructs the model to emit `"operation": "update"` for entities already present in the context, preventing node duplication as the graph grows.
+
+### Recall Pipeline
 
 ```
 Query text
-  │
-  ▼
-Check per-user LRU cache ──► cache hit? return immediately
-  │
-  ▼
-Embed query
-  │
-  ▼
-Neo4j vector search (cosine similarity, top-K seeds)
-  │
-  ▼
-Decay-weighted BFS traversal
-  │  (expand from seeds, score *= decay per hop, stop at min_score)
-  ▼
-Composite scoring: α·similarity + β·decay^hops + γ·strength
-  │
-  ▼
+  |
+  v
+Check per-user LRU cache ------> cache hit? return immediately  [0 calls]
+  |
+  v
+Step 1: embed(query) -> query_vector          [1 embedder call]
+  |
+  v
+Step 2: Neo4j vector search (top-K seeds)     [1 Neo4j call]
+         properties cleaned: _embedding, _version, etc. stripped
+  |
+  v
+Step 3: Single variable-length Cypher          [1 Neo4j call]
+         MATCH path = (seed)-[*1..3]-(m)
+         returns ALL reachable nodes in 1 round-trip
+         (replaces N+1 per-node BFS queries)
+  |
+  v
+Step 4: Composite scoring
+         final_score = a * similarity + b * decay^hops + g * strength
+  |
+  v
 Rank and return top-K ScoredNode[]
-  │
-  ▼
+  |
+  v
 Cache result, return RecallResult
 ```
+
+**Zero LLM calls on the read path.** All intelligence was front-loaded at ingestion.
 
 ## Core Concepts
 
@@ -355,11 +385,17 @@ config = Config(
 
 ### Traversal
 
-After vector search returns seed nodes, BFS expands outward through relationships. Each hop multiplies the score by a decay factor. Expansion stops when:
+After vector search returns seed nodes, a **single variable-length Cypher query** expands outward through relationships in one Neo4j round-trip:
 
-- **Max depth reached** (default: 5 hops)
-- **Score drops below min_score** (default: 0.1)
-- **Node already visited** (cycle prevention)
+```cypher
+MATCH (seed) WHERE elementId(seed) IN $seedIds
+MATCH path = (seed)-[*1..3]-(m)
+WHERE m.userId = $userId AND m.isCurrent = true
+WITH DISTINCT m, min(length(path)) AS hops
+RETURN elementId(m) AS elementId, hops, m.strength AS strength, labels(m)[0] AS label
+```
+
+Each hop multiplies the score by a decay factor (`score = decay^hops`). Nodes whose score drops below `min_score` are filtered out in Python.
 
 ```python
 config = Config(
@@ -368,6 +404,8 @@ config = Config(
     traversal_min_score=0.15,  # prune weak paths earlier
 )
 ```
+
+This replaces the previous per-node BFS approach (which could generate 100+ individual queries) with a single round-trip regardless of graph size.
 
 ### Hierarchical Summary Tree
 
@@ -510,9 +548,9 @@ config = Config(
 
 | Method | Description |
 |--------|-------------|
-| `ingest(user_id, text, reference_id=None)` | Extract entities from text and store in the graph |
+| `ingest(user_id, text, reference_id=None)` | Embed text, fetch slim context, LLM extraction, batched graph upsert; returns token counts |
 | `ingest_batch(user_id, items)` | Ingest multiple messages (each `{"text": "...", "reference_id": "..."}`) |
-| `recall(user_id, query, top_k=10)` | Retrieve relevant memories ranked by composite score |
+| `recall(user_id, query, top_k=10)` | Vector search + single-query traversal + composite scoring; 0 LLM calls |
 | `search(user_id, query, top_k=10, detail_level="auto")` | Hierarchical search through summary tree |
 | `get_graph(user_id, page=1, page_size=100)` | Paginated snapshot of a user's memory graph |
 | `delete_memory(user_id, node_id, cascade=False)` | Delete a node (cascade removes relationships too) |
@@ -523,7 +561,7 @@ config = Config(
 
 | Model | Purpose |
 |-------|---------|
-| `IngestResult` | Response from `ingest()`: `skipped`, `nodes_created`, `nodes_updated`, `relationships_created` |
+| `IngestResult` | Response from `ingest()`: `skipped`, `nodes_created`, `nodes_updated`, `relationships_created`, `tokens_prompt`, `tokens_completion`, `tokens_total` |
 | `RecallResult` | Response from `recall()`: `nodes` (list of `ScoredNode`), `total_candidates`, `from_cache` |
 | `ScoredNode` | A node with `element_id`, `label`, `summary`, `score`, `hops_from_seed`, `properties` |
 | `GraphSnapshot` | Paginated graph view: `nodes`, `relationships`, `total_nodes`, pagination fields |
@@ -601,11 +639,11 @@ engram_memory/
 ├── rate_limiter.py           # Token-bucket rate limiter
 ├── graph/
 │   ├── driver.py             # Async Neo4j driver wrapper
-│   ├── engine.py             # Dynamic Cypher generator
+│   ├── engine.py             # Dynamic Cypher generator (single + batched UNWIND)
 │   ├── indexes.py            # Vector index management
 │   ├── migrations.py         # Schema versioning
 │   ├── sanitise.py           # Label/type sanitisation
-│   ├── traversal.py          # Decay-weighted BFS
+│   ├── traversal.py          # Single-query variable-length path traversal
 │   ├── scorer.py             # Composite scoring
 │   └── hierarchy.py          # Cluster summary tree
 ├── embeddings/
@@ -640,6 +678,50 @@ engram_memory/
     ├── hierarchy_task.py     # Cluster summary rebuild
     └── weight_learning_task.py  # Scoring weight telemetry
 ```
+
+## Performance & Cost Model
+
+### Resource Consumption per Operation
+
+| Operation | LLM Calls | Embedder Calls | Neo4j Calls | Typical Latency |
+|-----------|-----------|----------------|-------------|-----------------|
+| Ingest (trivial) | 0 | 0 | 0 | ~1 ms |
+| Ingest (factual) | 1 | 1 + N (summary differs) | ~4 (batched) | ~5 s |
+| Recall (cache hit) | 0 | 0 | 0 | < 1 ms |
+| Recall (cache miss) | 0 | 1 | 2 | ~200 ms |
+| Search (hierarchical) | 0 | 1 | 1 | ~100 ms |
+| get_graph | 0 | 0 | 2 | ~50 ms |
+
+### Benchmark Results (12-document corpus, Azure GPT-4-32k)
+
+| Metric | Value |
+|--------|-------|
+| Avg tokens per ingest | 735 |
+| Total tokens (12 docs) | 8,823 |
+| Prompt / Completion split | 4,335 / 4,488 |
+| Avg nodes per ingest | 2.67 |
+| Ingest p50 / p95 | 4,982 ms / 6,680 ms |
+| Recall p50 / p95 | 200 ms / 368 ms |
+| MRR | 0.83 |
+| Precision@3 | 0.72 |
+| Recall@3 | 0.67 |
+
+Token usage is logged per-ingest in `IngestResult.tokens_prompt`, `tokens_completion`, and `tokens_total`, enabling precise cost tracking in production.
+
+### Cost Estimation
+
+The benchmark includes configurable per-model pricing. Example with Azure GPT-4-32k:
+
+| Metric | Value |
+|--------|-------|
+| Prompt cost | $0.06 / 1K tokens |
+| Completion cost | $0.12 / 1K tokens |
+| Cost per ingest | ~$0.07 |
+| Cost per 1K documents | ~$66.86 |
+
+Switch to a cheaper model (GPT-4o-mini, Claude Haiku) and these numbers drop by 10-50x.
+
+---
 
 ## 🤝 Contributing
 

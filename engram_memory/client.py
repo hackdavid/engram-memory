@@ -34,6 +34,18 @@ from engram_memory.rate_limiter import RateLimiter
 
 logger = logging.getLogger(__name__)
 
+
+async def _encode(embedder, text: str) -> list[float]:
+    """Call the embedder, using async path if available (e.g. OpenAIEmbedding)."""
+    if hasattr(embedder, "encode_async"):
+        return await embedder.encode_async(text)
+    return embedder.encode(text)
+
+_INTERNAL_PROPERTY_PREFIXES = ("_embedding", "_schemaVersion", "_version")
+_INTERNAL_PROPERTY_EXACT = frozenset({
+    "isCurrent", "lastAccessed", "userId", "strength", "referenceId",
+})
+
 _VECTOR_SEARCH_QUERY = (
     "CALL db.index.vector.queryNodes($indexName, $topK, $queryVector) "
     "YIELD node, score AS similarity "
@@ -44,12 +56,30 @@ _VECTOR_SEARCH_QUERY = (
     "       properties(node) AS properties"
 )
 
-_NEIGHBOURHOOD_QUERY = (
-    "MATCH (n)-[r]-(m) "
-    "WHERE n.userId = $userId AND n.isCurrent = true "
-    "RETURN elementId(m) AS elementId, labels(m)[0] AS label, "
-    "       properties(m) AS props "
-    "LIMIT 50"
+
+def _clean_properties(props: dict[str, Any] | None) -> dict[str, Any]:
+    """Strip internal/bulky keys from a properties dict before surfacing to users."""
+    if not props:
+        return {}
+    return {
+        k: v
+        for k, v in props.items()
+        if not k.startswith("_") and k not in _INTERNAL_PROPERTY_EXACT
+    }
+
+_INGEST_CONTEXT_QUERY = (
+    "CALL db.index.vector.queryNodes($indexName, $topK, $queryVector) "
+    "YIELD node, score "
+    "WHERE node.userId = $userId AND node.isCurrent = true "
+    "WITH node, score "
+    "OPTIONAL MATCH (node)-[r]-(neighbor) "
+    "WHERE neighbor.userId = $userId AND neighbor.isCurrent = true "
+    "RETURN elementId(node) AS elementId, "
+    "       labels(node)[0] AS label, "
+    "       node.summary AS summary, "
+    "       collect(DISTINCT type(r)) AS rel_types, "
+    "       score AS similarity "
+    "ORDER BY similarity DESC"
 )
 
 _GRAPH_QUERY = (
@@ -137,7 +167,9 @@ class AsyncMemoryClient:
             from engram_memory.embeddings.openai_embedding import OpenAIEmbedding
             self._embedder = OpenAIEmbedding(
                 api_key=config.embedding_api_key,
+                model=config.embedding_model,
                 dimensions=config.embedding_dimensions,
+                base_url=config.embedding_api_base,
             )
 
         if config.two_tier_embedding:
@@ -215,7 +247,19 @@ class AsyncMemoryClient:
         text: str,
         reference_id: str | None = None,
     ) -> IngestResult:
-        """Ingest a single message into the memory graph."""
+        """Ingest a single message into the memory graph.
+
+        Flow:
+          1. embed(text) -> query_vector
+          2. vector_search(query_vector, top_k=5) -> top-5 similar existing nodes
+             (returns only elementId, label, summary, rel_types — no raw properties)
+          3. build_user_prompt(text, context_nodes) -> slim prompt
+          4. LLM extracts NodeInstructions + RelInstructions
+          5. Write nodes (reuse text embedding for nodes whose summary == text;
+             compute fresh embedding for node summaries that differ)
+          6. Write relationships
+          7. Return IngestResult with token counts from the LLM call
+        """
         validate_user_id(user_id, self._user_id_pattern)
 
         if is_trivial(text):
@@ -224,56 +268,102 @@ class AsyncMemoryClient:
         if self._rate_limiter:
             await self._rate_limiter.acquire()
 
-        neighbourhood = await self._driver.execute(
-            _NEIGHBOURHOOD_QUERY, userId=user_id,
+        # Step 1: embed the input text once — reused for context search AND node storage.
+        text_embedding = await _encode(self._embedder, text)
+
+        # Step 2: vector-search for the top-5 most semantically similar existing nodes.
+        # Returns slim context: elementId, label, summary, rel_types.
+        # Gracefully returns [] when the graph is empty (no index entries yet).
+        context_nodes = await self._driver.execute(
+            _INGEST_CONTEXT_QUERY,
+            indexName="engram_embedding_index",
+            topK=5,
+            queryVector=text_embedding,
+            userId=user_id,
         )
 
+        # Step 3 + 4: build prompt from slim context and call the LLM.
         nodes, rels = await self._extractor.extract(
-            user_id=user_id, text=text, neighbourhood=neighbourhood,
+            user_id=user_id, text=text, neighbourhood=context_nodes,
         )
+
+        # Capture token usage from the LLM call just completed.
+        usage = self._llm.last_usage
+
+        # ── Step 5: Prepare node batch ──
+        # Collect embeddings + metadata; temp_id -> index mapping for rel resolution.
+        batch_items: list[dict[str, Any]] = []
+        node_meta: list[dict[str, Any]] = []  # parallel list: operation, label, cluster_hint
+        for node in nodes:
+            if node.summary and node.summary.strip() != text.strip():
+                embedding = await _encode(self._embedder, node.summary)
+            else:
+                embedding = text_embedding
+
+            node_props = {**node.properties, "summary": node.summary}
+            batch_items.append({
+                "label": node.label,
+                "merge_keys": node.merge_keys,
+                "properties": node_props,
+                "embedding": embedding,
+                "reference_id": reference_id,
+            })
+            node_meta.append({
+                "operation": node.operation,
+                "label": node.label,
+                "cluster_hint": node.cluster_hint,
+            })
+
+        # Execute batched node upserts (one UNWIND per label group).
+        queries = self._engine.build_grouped_batch_upsert(
+            batch_items, user_id=user_id,
+        )
+        element_ids: list[str] = []
+        for cypher, params in queries:
+            rows = await self._driver.execute(cypher, params)
+            element_ids.extend(r["elementId"] for r in rows)
+
+        # Build temp_N -> real elementId mapping for relationship resolution.
+        temp_to_eid: dict[str, str] = {}
+        for idx, eid in enumerate(element_ids):
+            temp_to_eid[f"temp_{idx}"] = eid
 
         created, updated = [], []
-        for node in nodes:
-            embedding = self._embedder.encode(node.summary)
-            # Persist summary on the node (used for recall); LLM may omit it from properties.
-            node_props = {**node.properties, "summary": node.summary}
-            cypher, params = self._engine.build_upsert(
-                label=node.label,
-                merge_keys=node.merge_keys,
-                properties=node_props,
-                embedding=embedding,
-                user_id=user_id,
-                reference_id=reference_id,
-            )
-            result = await self._driver.execute(cypher, params)
-            eid = result[0]["elementId"] if result else "unknown"
+        for idx, eid in enumerate(element_ids):
+            meta = node_meta[idx]
             nr = NodeResult(
                 element_id=eid,
-                label=node.label,
+                label=meta["label"],
                 reference_id=reference_id,
-                operation="created" if node.operation == "create" else "updated",
+                operation="created" if meta["operation"] == "create" else "updated",
             )
-            if node.operation == "create":
+            if meta["operation"] == "create":
                 created.append(nr)
             else:
                 updated.append(nr)
 
-            if node.cluster_hint:
+            if meta["cluster_hint"]:
                 await self._hierarchy.assign_to_cluster(
-                    user_id=user_id, node_id=eid, cluster_hint=node.cluster_hint,
+                    user_id=user_id, node_id=eid, cluster_hint=meta["cluster_hint"],
                 )
 
-        rel_count = 0
+        # ── Step 6: Batch relationship writes ──
+        # Resolve temp_N references to real elementIds.
+        rel_batch: list[dict[str, str]] = []
         for rel in rels:
-            cypher, params = self._engine.build_relationship(
-                from_ref=rel.from_ref,
-                to_ref=rel.to_ref,
-                rel_type=rel.type,
-                user_id=user_id,
-                properties=rel.properties,
-            )
-            await self._driver.execute(cypher, params)
-            rel_count += 1
+            from_ref = temp_to_eid.get(rel.from_ref, rel.from_ref)
+            to_ref = temp_to_eid.get(rel.to_ref, rel.to_ref)
+            rel_batch.append({
+                "from_ref": from_ref,
+                "to_ref": to_ref,
+                "rel_type": rel.type,
+            })
+        rel_queries = self._engine.build_batch_relationships(rel_batch, user_id=user_id)
+        rel_count = 0
+        if rel_queries:
+            for cypher, params in rel_queries:
+                rows = await self._driver.execute(cypher, params)
+                rel_count += len(rows)
 
         if self._cache:
             await self._cache.invalidate_user(user_id)
@@ -283,6 +373,9 @@ class AsyncMemoryClient:
             nodes_created=created,
             nodes_updated=updated,
             relationships_created=rel_count,
+            tokens_prompt=usage.get("prompt_tokens", 0),
+            tokens_completion=usage.get("completion_tokens", 0),
+            tokens_total=usage.get("total_tokens", 0),
         )
 
     async def ingest_batch(
@@ -317,7 +410,7 @@ class AsyncMemoryClient:
             if cached is not None:
                 return cached
 
-        query_vector = self._embedder.encode(query)
+        query_vector = await _encode(self._embedder, query)
 
         seeds = await self._driver.execute(
             _VECTOR_SEARCH_QUERY,
@@ -342,7 +435,7 @@ class AsyncMemoryClient:
                 "strength": s.get("strength", 1.0),
                 "summary": s.get("summary", ""),
                 "label": s.get("label", ""),
-                "properties": s.get("properties", {}),
+                "properties": _clean_properties(s.get("properties")),
                 "referenceId": s.get("referenceId"),
                 "is_current": True,
             })
@@ -477,7 +570,7 @@ class AsyncMemoryClient:
     ) -> RecallResult:
         """Hierarchical search using the summary tree."""
         validate_user_id(user_id, self._user_id_pattern)
-        query_vector = self._embedder.encode(query)
+        query_vector = await _encode(self._embedder, query)
         results = await self._hierarchy.query_hierarchy(
             user_id=user_id,
             query_vector=query_vector,

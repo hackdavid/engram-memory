@@ -66,20 +66,23 @@ async def main():
         h = await client.health_check(ping_llm=True)
         assert h.neo4j_connected
 
+        # Ingest: 1 LLM call, batched writes, token tracking
         r = await client.ingest(
             user_id="demo-user",
             text="I work on graph memory at Acme Corp.",
             reference_id="msg-1",
         )
-        print(r.nodes_created, r.relationships_created)
+        print(f"{len(r.nodes_created)} nodes, {r.relationships_created} rels, "
+              f"{r.tokens_total} tokens")
 
+        # Recall: 0 LLM calls, vector search + graph traversal
         out = await client.recall(
             user_id="demo-user",
             query="Where does the user work?",
             top_k=5,
         )
         for n in out.nodes:
-            print(n.score, n.summary)
+            print(f"  [{n.score:.2f}] {n.summary}")
 
 asyncio.run(main())
 ```

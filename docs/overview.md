@@ -113,21 +113,17 @@ sequenceDiagram
     else has factual content
         Filter-->>Client: False
         Client->>Emb: encode(text)
-        Emb-->>Client: query_vector
-        Client->>Graph: vector search top-5 + 1-hop neighbours
-        Graph-->>Client: neighbourhood snapshot
-        Client->>LLM: extract(text, snapshot) -- ONE CALL
-        LLM-->>Client: NodeInstruction[] + RelInstruction[]
-        loop each node
-            Client->>Emb: encode(node.summary)
-            Client->>Engine: build_upsert(label, merge_keys, props, vector, reference_id)
-            Client->>Graph: execute parameterised Cypher
-        end
-        loop each relationship
-            Client->>Engine: build_relationship(from, to, type)
-            Client->>Graph: execute Cypher
-        end
-        Client-->>App: IngestResult(nodes_created, nodes_updated, rels_created)
+        Emb-->>Client: query_vector (reused for node storage)
+        Client->>Graph: vector_search(query_vector, top_k=5)
+        Graph-->>Client: slim context: [elementId, label, summary, rel_types]
+        Client->>LLM: extract(text + slim context) -- ONE CALL
+        LLM-->>Client: NodeInstruction[] + RelInstruction[] + token usage
+        Client->>Engine: build_grouped_batch_upsert(nodes by label)
+        Client->>Graph: UNWIND batch MERGE (per label group)
+        Graph-->>Client: elementIds for temp_N resolution
+        Client->>Engine: build_batch_relationships(rels by type)
+        Client->>Graph: UNWIND batch MERGE (per rel type)
+        Client-->>App: IngestResult(nodes, rels, tokens_prompt, tokens_completion, tokens_total)
     end
 ```
 
@@ -135,8 +131,12 @@ sequenceDiagram
 
 **Key design decisions:**
 
-- **Trivial filter** ([extractors/trivial_filter.py](engram_memory/extractors/trivial_filter.py)): short text + no entity markers + common non-factual patterns = skip entirely, zero LLM cost
-- **Neighbourhood-aware extraction**: send only top-5 vector matches + 1-hop neighbours as context (~200-500 tokens), not the full graph. One LLM call does extraction + placement + relationship decisions.
+- **Trivial filter** ([extractors/trivial_filter.py](engram_memory/extractors/trivial_filter.py)): short text + no entity markers + common non-factual patterns = skip entirely, zero LLM cost.
+- **Slim context, minimal tokens**: only node summaries and relationship type names are sent to the LLM (~50-100 tokens for 5 context nodes), not raw properties or embedding vectors.
+- **Embedding reuse**: the text embedding computed in step 1 is reused for both context lookup and node storage; fresh embeddings are only computed for nodes whose summary differs from the input.
+- **Batched writes**: nodes are grouped by label and written via `UNWIND` queries; relationships are grouped by type. A typical 4-node + 3-rel ingest uses ~4 Neo4j round-trips instead of 7.
+- **Update-aware extraction**: the LLM prompt explicitly instructs the model to emit `"operation": "update"` for entities already in the context, preventing duplication.
+- **Token tracking**: every `IngestResult` carries `tokens_prompt`, `tokens_completion`, `tokens_total` for cost monitoring.
 - **Dynamic Cypher**: [graph/engine.py](engram_memory/graph/engine.py) generates parameterised MERGE/SET from any label, any merge keys, any properties. Labels sanitised via regex before interpolation.
 - **reference_id**: stored as `referenceId` property on every node created from this ingest. Optional.
 
@@ -160,7 +160,10 @@ class IngestResult(BaseModel):
     skipped: bool = False
     nodes_created: list[NodeResult] = []
     nodes_updated: list[NodeResult] = []
-    relationships_created: list[RelResult] = []
+    relationships_created: int = 0
+    tokens_prompt: int = 0
+    tokens_completion: int = 0
+    tokens_total: int = 0
 ```
 
 ### Security
@@ -178,28 +181,35 @@ class IngestResult(BaseModel):
 sequenceDiagram
     participant App
     participant Client as MemoryClient
+    participant Cache as LRU Cache
     participant Emb as Embedder
     participant Graph as Neo4j
     participant Scorer as CompositeScorer
 
     App->>Client: recall(user_id, query, top_k=5)
-    Client->>Emb: encode(query)
-    Emb-->>Client: query_vector
-    Client->>Graph: vector search top-K seed nodes
-    Graph-->>Client: seeds with similarity scores
-    Client->>Graph: decay-weighted traversal from seeds
-    Graph-->>Client: expanded subgraph
-    Client->>Scorer: rank all nodes by composite score
-    Scorer-->>Client: top results ordered
-    Client->>Graph: update lastAccessed + strength on hits
-    Client-->>App: RecallResult(nodes with reference_ids, subgraph)
+    Client->>Cache: check(user_id, query_hash)
+    alt cache hit
+        Cache-->>Client: cached RecallResult
+        Client-->>App: RecallResult(from_cache=true)
+    else cache miss
+        Client->>Emb: encode(query)
+        Emb-->>Client: query_vector
+        Client->>Graph: vector search top-K seed nodes (properties cleaned)
+        Graph-->>Client: seeds with similarity scores
+        Client->>Graph: single variable-length path query (1 round-trip)
+        Graph-->>Client: all reachable nodes within max_depth hops
+        Client->>Scorer: rank all candidates by composite score
+        Scorer-->>Client: top results ordered
+        Client->>Cache: store result
+        Client-->>App: RecallResult(nodes, from_cache=false)
+    end
 ```
 
 
 
-### Decay-Weighted Traversal ([graph/traversal.py](engram_memory/graph/traversal.py))
+### Single-Query Variable-Length Traversal ([graph/traversal.py](engram_memory/graph/traversal.py))
 
-BFS from seeds. Each hop multiplies score by `decay` (default 0.5). Stops expanding when `score < min_score` (default 0.1). `max_depth` is a safety cap (default 5). Adaptive: dense relevant clusters go deep, sparse areas stop early.
+A single Cypher query using variable-length paths (`MATCH path = (seed)-[*1..N]-(m)`) replaces the previous per-node BFS loop. This collapses potentially hundreds of individual Neo4j queries into **one round-trip** regardless of graph size. Each hop multiplies score by `decay` (default 0.5). Nodes whose computed score falls below `min_score` (default 0.1) are filtered out in Python.
 
 ### Composite Scoring ([graph/scorer.py](engram_memory/graph/scorer.py))
 
@@ -291,14 +301,16 @@ No DATABASE_URL. No relational DB config. Neo4j + LLM + Embeddings only.
 ## Cost Model
 
 
-| Operation        | LLM | Embedding | Neo4j | Latency |
-| ---------------- | --- | --------- | ----- | ------- |
-| Ingest (trivial) | 0   | 0         | 0     | ~1ms    |
-| Ingest (factual) | 1   | 1+N       | 3     | ~2-3s   |
-| Recall (default) | 0   | 1         | 2     | ~50ms   |
-| Recall (rerank)  | 1   | 1         | 2     | ~2s     |
-| Search           | 0   | 1         | 1     | ~30ms   |
-| get_graph        | 0   | 0         | 1     | ~20ms   |
+| Operation | LLM Calls | Embedder Calls | Neo4j Calls | Typical Latency |
+|-----------|-----------|----------------|-------------|-----------------|
+| Ingest (trivial) | 0 | 0 | 0 | ~1 ms |
+| Ingest (factual) | 1 | 1 + N (summary differs) | ~4 (batched) | ~5 s |
+| Recall (cache hit) | 0 | 0 | 0 | < 1 ms |
+| Recall (cache miss) | 0 | 1 | 2 | ~200 ms |
+| Search (hierarchical) | 0 | 1 | 1 | ~100 ms |
+| get_graph | 0 | 0 | 2 | ~50 ms |
+
+Token usage is tracked per-ingest via `IngestResult.tokens_prompt`, `tokens_completion`, and `tokens_total`. The benchmark suite includes configurable per-model pricing for cost estimation.
 
 
 ---

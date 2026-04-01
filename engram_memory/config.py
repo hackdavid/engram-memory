@@ -72,6 +72,7 @@ class Config(BaseSettings):
     embedding_model: str = DEFAULT_EMBEDDING_MODEL
     embedding_dimensions: int = DEFAULT_EMBEDDING_DIMENSIONS
     embedding_api_key: Optional[str] = None
+    embedding_api_base: Optional[str] = None
     two_tier_embedding: bool = False
 
     # -- Scoring --

@@ -9,10 +9,16 @@ from engram_memory.models import HealthStatus, IngestResult, RecallResult
 
 @pytest.fixture
 def mock_components():
+    embedder = MagicMock()
+    del embedder.encode_async
+
+    llm = AsyncMock()
+    llm.last_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
     return {
         "driver": AsyncMock(),
-        "llm": AsyncMock(),
-        "embedder": MagicMock(),
+        "llm": llm,
+        "embedder": embedder,
         "extractor": AsyncMock(),
         "engine": MagicMock(),
         "traversal": AsyncMock(),
@@ -57,7 +63,11 @@ async def test_full_lifecycle(mock_components):
 
     # -- 2. Ingest --
     mc["embedder"].encode.return_value = [0.1, 0.2, 0.3]
-    mc["driver"].execute.return_value = [{"elementId": "eid-alice"}]
+    mc["driver"].execute.side_effect = [
+        [],  # context query
+        [{"elementId": "eid-alice"}],  # batch node upsert
+        [{"type": "WORKS_AT"}],  # batch rel upsert
+    ]
     mc["extractor"].extract.return_value = (
         [MagicMock(
             operation="create", label="Person", merge_keys={"name": "Alice"},
@@ -69,8 +79,12 @@ async def test_full_lifecycle(mock_components):
             properties={"since": 2020},
         )],
     )
-    mc["engine"].build_upsert.return_value = ("MERGE ...", {"p": 1})
-    mc["engine"].build_relationship.return_value = ("MATCH ...", {"r": 1})
+    mc["engine"].build_grouped_batch_upsert.return_value = [
+        ("MERGE ...", {"batch": [], "userId": "u1", "schemaVersion": 1})
+    ]
+    mc["engine"].build_batch_relationships.return_value = [
+        ("MATCH ...", {"batch": [], "userId": "u1"})
+    ]
 
     with patch("engram_memory.client.is_trivial", return_value=False):
         ingest_result = await client.ingest(
@@ -83,6 +97,7 @@ async def test_full_lifecycle(mock_components):
     assert len(ingest_result.nodes_created) == 1
     assert ingest_result.relationships_created == 1
     mc["cache"].invalidate_user.assert_awaited_with("u1")
+    mc["driver"].execute.side_effect = None
 
     # -- 3. Recall --
     mc["cache"].get.return_value = None  # cache miss
@@ -154,7 +169,7 @@ async def test_batch_ingest_lifecycle(mock_components):
     client = _make_client(mc)
 
     mc["embedder"].encode.return_value = [0.1]
-    mc["driver"].execute.return_value = [{"elementId": "eid1"}]
+    mc["driver"].execute.return_value = []
     mc["extractor"].extract.return_value = (
         [MagicMock(
             operation="create", label="Fact", merge_keys={"k": "v"},
@@ -162,7 +177,10 @@ async def test_batch_ingest_lifecycle(mock_components):
         )],
         [],
     )
-    mc["engine"].build_upsert.return_value = ("MERGE ...", {})
+    mc["engine"].build_grouped_batch_upsert.return_value = [
+        ("MERGE ...", {"batch": [], "userId": "u1", "schemaVersion": 1})
+    ]
+    mc["engine"].build_batch_relationships.return_value = None
 
     with patch("engram_memory.client.is_trivial", side_effect=[True, False, True, False]):
         results = await client.ingest_batch(

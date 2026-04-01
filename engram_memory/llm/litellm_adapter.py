@@ -57,7 +57,7 @@ class LiteLLMAdapter(BaseLLM):
 
         self._litellm.drop_params = True
 
-    async def _call(self, system: str, user: str) -> str:
+    async def _call(self, system: str, user: str) -> tuple[str, dict[str, int]]:
         kwargs: dict[str, Any] = {
             "model": self._model,
             "messages": [
@@ -77,7 +77,14 @@ class LiteLLMAdapter(BaseLLM):
         kwargs.update(self._extra_params)
 
         response = await self._litellm.acompletion(**kwargs)
-        return response.choices[0].message.content
+        content = response.choices[0].message.content
+        usage = response.usage or {}
+        token_info: dict[str, int] = {
+            "prompt_tokens": int(getattr(usage, "prompt_tokens", 0) or 0),
+            "completion_tokens": int(getattr(usage, "completion_tokens", 0) or 0),
+            "total_tokens": int(getattr(usage, "total_tokens", 0) or 0),
+        }
+        return content, token_info
 
     async def ping(self) -> bool:
         """Quick health check -- send a trivial prompt."""

@@ -22,10 +22,14 @@ class OpenAIEmbedding(BaseEmbedding):
         api_key: str,
         model: str = "text-embedding-3-small",
         dimensions: int = 1536,
+        base_url: str | None = None,
     ) -> None:
         if AsyncOpenAI is None:
             raise ImportError("openai is required: pip install engram_memory[openai]")
-        self._client = AsyncOpenAI(api_key=api_key)
+        kwargs: dict = {"api_key": api_key}
+        if base_url:
+            kwargs["base_url"] = base_url
+        self._client = AsyncOpenAI(**kwargs)
         self._model = model
         self._dimensions = dimensions
 

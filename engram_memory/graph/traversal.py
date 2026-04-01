@@ -1,24 +1,28 @@
-"""Decay-weighted BFS graph traversal."""
+"""Decay-weighted graph traversal via a single variable-length Cypher query."""
 
 from __future__ import annotations
 
 import logging
-from collections import deque
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
-EXPAND_QUERY = (
-    "MATCH (n)-[r]-(m) "
-    "WHERE elementId(n) = $nodeId AND m.userId = $userId "
-    "RETURN elementId(m) AS elementId, "
-    "       m.strength AS score, "
-    "       labels(m)[0] AS label"
+_TRAVERSE_QUERY = (
+    "MATCH (seed) WHERE elementId(seed) IN $seedIds "
+    "MATCH path = (seed)-[*1..{max_depth}]-(m) "
+    "WHERE m.userId = $userId AND m.isCurrent = true "
+    "WITH DISTINCT m, min(length(path)) AS hops "
+    "RETURN elementId(m) AS elementId, hops, "
+    "       m.strength AS strength, labels(m)[0] AS label"
 )
 
 
 class TraversalEngine:
-    """BFS traversal with exponential score decay per hop."""
+    """Graph traversal with exponential score decay per hop.
+
+    Uses a single variable-length Cypher query instead of per-node BFS,
+    collapsing potentially hundreds of round-trips into one.
+    """
 
     def __init__(
         self,
@@ -37,53 +41,46 @@ class TraversalEngine:
         seeds: list[dict[str, Any]],
         user_id: str,
     ) -> list[dict[str, Any]]:
-        """Expand from seed nodes via BFS, decaying score each hop.
+        """Expand from seed nodes, decaying score each hop.
 
         Returns a list of dicts with elementId, score, hops, label.
         """
-        visited: set[str] = set()
-        results: list[dict[str, Any]] = []
-        queue: deque[tuple[str, float, int]] = deque()
+        if not seeds:
+            return []
 
+        seed_ids = [s["elementId"] for s in seeds]
+
+        results: list[dict[str, Any]] = []
         for seed in seeds:
-            eid = seed["elementId"]
-            score = seed.get("score", 1.0)
-            visited.add(eid)
-            queue.append((eid, score, 0))
             results.append({
-                "elementId": eid,
-                "score": score,
+                "elementId": seed["elementId"],
+                "score": seed.get("score", 1.0),
                 "hops": 0,
             })
 
-        while queue:
-            node_id, parent_score, depth = queue.popleft()
+        query = _TRAVERSE_QUERY.format(max_depth=self._max_depth)
+        rows = await self._driver.execute(
+            query,
+            seedIds=seed_ids,
+            userId=user_id,
+        )
 
-            if depth >= self._max_depth:
+        seed_set = set(seed_ids)
+        for row in rows:
+            eid = row["elementId"]
+            if eid in seed_set:
                 continue
 
-            child_score = parent_score * self._decay
-            if child_score < self._min_score:
+            hops = row["hops"]
+            score = self._decay ** hops
+            if score < self._min_score:
                 continue
 
-            neighbours = await self._driver.execute(
-                EXPAND_QUERY,
-                nodeId=node_id,
-                userId=user_id,
-            )
-
-            for nbr in neighbours:
-                eid = nbr["elementId"]
-                if eid in visited:
-                    continue
-                visited.add(eid)
-                entry = {
-                    "elementId": eid,
-                    "score": child_score,
-                    "hops": depth + 1,
-                    "label": nbr.get("label"),
-                }
-                results.append(entry)
-                queue.append((eid, child_score, depth + 1))
+            results.append({
+                "elementId": eid,
+                "score": score,
+                "hops": hops,
+                "label": row.get("label"),
+            })
 
         return results

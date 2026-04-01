@@ -38,6 +38,16 @@ Run in CI against a dedicated Neo4j instance. Full options: `--help`.
 - Set **`LOG_FORMAT=json`** for centralized log aggregation.
 - Correlate logs with your `user_id` and `reference_id` in application-level fields where possible.
 
+## Token tracking & cost monitoring
+
+Every `IngestResult` includes `tokens_prompt`, `tokens_completion`, and `tokens_total`, enabling per-call cost monitoring in production. Use these fields to:
+
+- Track LLM spend per user or per document
+- Set alerts when token usage exceeds thresholds
+- Compare models for cost-efficiency
+
+The benchmark suite (`tests/test_live_benchmark.py`) includes configurable per-model pricing and generates cost estimates in `benchmarks/benchmark_report.json`.
+
 ## Rate limits and resilience
 
 - **LLM**: token-bucket (`LLM_RATE_LIMIT_RPM`, `LLM_RATE_LIMIT_BURST`) applies to ingestion.

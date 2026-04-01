@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from engram_memory.constants import SDK_SCHEMA_VERSION
 
@@ -19,10 +19,26 @@ class NodeInstruction(BaseModel):
     ref: str | None = None
     label: str
     merge_keys: dict[str, Any]
-    properties: dict[str, Any]
+    properties: dict[str, Any] = Field(default_factory=dict)
     summary: str
     cluster_hint: str | None = None
     supersedes_ref: str | None = None
+
+    @field_validator("properties", mode="before")
+    @classmethod
+    def _coerce_properties(cls, v: Any) -> dict[str, Any]:
+        """Tolerate null/None from LLM output by defaulting to empty dict."""
+        if v is None:
+            return {}
+        return v
+
+    @field_validator("merge_keys", mode="before")
+    @classmethod
+    def _coerce_merge_keys(cls, v: Any) -> dict[str, Any]:
+        """Tolerate null/None from LLM output by defaulting to empty dict."""
+        if v is None:
+            return {}
+        return v
 
 
 class RelInstruction(BaseModel):
@@ -62,6 +78,9 @@ class IngestResult(BaseModel):
     nodes_created: list[NodeResult] = Field(default_factory=list)
     nodes_updated: list[NodeResult] = Field(default_factory=list)
     relationships_created: int = 0
+    tokens_prompt: int = 0
+    tokens_completion: int = 0
+    tokens_total: int = 0
 
 
 # ── Retrieval models ────────────────────────────────────────────────
