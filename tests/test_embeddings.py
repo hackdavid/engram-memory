@@ -1,7 +1,7 @@
 """Phase 2: Embedding provider tests (all mocked, no model downloads)."""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 from engram_memory.embeddings.base import BaseEmbedding
 
