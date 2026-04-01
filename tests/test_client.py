@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from engram_memory.exceptions import HasRelationshipsError, InvalidUserIdError
-from engram_memory.models import IngestResult, RecallResult
+from engram_memory.models import RecallResult
 
 
 @pytest.fixture

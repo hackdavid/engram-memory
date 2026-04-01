@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from engram_memory.client import AsyncMemoryClient
-from engram_memory.models import HealthStatus, IngestResult, RecallResult
+from engram_memory.models import HealthStatus, RecallResult
 
 
 @pytest.fixture

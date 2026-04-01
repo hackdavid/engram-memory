@@ -14,8 +14,8 @@ def test_package_installs_cleanly():
 
 
 def test_imports_after_install():
-    from engram_memory import AsyncMemoryClient, Config, MemoryClient
-    from engram_memory.models import (
+    from engram_memory import AsyncMemoryClient, Config, MemoryClient  # noqa: F401
+    from engram_memory.models import (  # noqa: F401
         GraphSnapshot,
         HealthStatus,
         IngestResult,
@@ -24,7 +24,7 @@ def test_imports_after_install():
         RelInstruction,
         ScoredNode,
     )
-    from engram_memory.exceptions import (
+    from engram_memory.exceptions import (  # noqa: F401
         CircuitOpenError,
         ConcurrentModificationError,
         ConfigurationError,
@@ -50,29 +50,29 @@ def test_version_string():
 
 
 def test_subpackage_imports():
-    from engram_memory.graph.driver import GraphDriver
-    from engram_memory.graph.engine import CypherEngine
-    from engram_memory.graph.indexes import IndexManager
-    from engram_memory.graph.migrations import MigrationRunner
-    from engram_memory.graph.traversal import TraversalEngine
-    from engram_memory.graph.scorer import CompositeScorer
-    from engram_memory.graph.hierarchy import HierarchyManager
-    from engram_memory.graph.sanitise import sanitise_label, sanitise_rel_type, validate_user_id
-    from engram_memory.embeddings.base import BaseEmbedding
-    from engram_memory.embeddings.two_tier import TwoTierEmbedder
-    from engram_memory.llm.base import BaseLLM
-    from engram_memory.extractors.llm_extractor import LLMExtractor
-    from engram_memory.extractors.trivial_filter import is_trivial
-    from engram_memory.cache.lru_cache import MemoryCache
-    from engram_memory.hooks.base import Hook
-    from engram_memory.hooks.logger_hook import LoggerHook
-    from engram_memory.health.checks import HealthChecker
-    from engram_memory.background.runner import BackgroundRunner
-    from engram_memory.background.decay_task import DecayTask
-    from engram_memory.rate_limiter import RateLimiter
-    from engram_memory.observability.logging import setup_logging
-    from engram_memory.observability.metrics import metrics, MetricsRegistry
-    from engram_memory.observability.tracing import traced
+    from engram_memory.graph.driver import GraphDriver  # noqa: F401
+    from engram_memory.graph.engine import CypherEngine  # noqa: F401
+    from engram_memory.graph.indexes import IndexManager  # noqa: F401
+    from engram_memory.graph.migrations import MigrationRunner  # noqa: F401
+    from engram_memory.graph.traversal import TraversalEngine  # noqa: F401
+    from engram_memory.graph.scorer import CompositeScorer  # noqa: F401
+    from engram_memory.graph.hierarchy import HierarchyManager  # noqa: F401
+    from engram_memory.graph.sanitise import sanitise_label, sanitise_rel_type, validate_user_id  # noqa: F401
+    from engram_memory.embeddings.base import BaseEmbedding  # noqa: F401
+    from engram_memory.embeddings.two_tier import TwoTierEmbedder  # noqa: F401
+    from engram_memory.llm.base import BaseLLM  # noqa: F401
+    from engram_memory.extractors.llm_extractor import LLMExtractor  # noqa: F401
+    from engram_memory.extractors.trivial_filter import is_trivial  # noqa: F401
+    from engram_memory.cache.lru_cache import MemoryCache  # noqa: F401
+    from engram_memory.hooks.base import Hook  # noqa: F401
+    from engram_memory.hooks.logger_hook import LoggerHook  # noqa: F401
+    from engram_memory.health.checks import HealthChecker  # noqa: F401
+    from engram_memory.background.runner import BackgroundRunner  # noqa: F401
+    from engram_memory.background.decay_task import DecayTask  # noqa: F401
+    from engram_memory.rate_limiter import RateLimiter  # noqa: F401
+    from engram_memory.observability.logging import setup_logging  # noqa: F401
+    from engram_memory.observability.metrics import metrics, MetricsRegistry  # noqa: F401
+    from engram_memory.observability.tracing import traced  # noqa: F401
 
 
 def test_py_typed_marker_exists():
