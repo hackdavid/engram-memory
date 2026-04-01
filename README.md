@@ -35,7 +35,7 @@ Most agent memory is a **flat pile of chunks** or a **single vector index**. Tha
 | “Ask the LLM” for every recall | Cost + latency | **`recall()` = embeddings + vector index + BFS + composite score** |
 | Rigid schema | Doesn’t fit every domain | **Schema emerges at runtime** from structured JSON extraction |
 
-Engram is built for **multi-step agents, copilots, and long-running workflows**: isolated `user_id` namespaces, hooks for audit/telemetry, health checks, and a CLI smoke test (`engram-e2e`) you can run in CI against a real database.
+Engram is built for **multi-step agents, copilots, and long-running workflows**: isolated `user_id` namespaces, hooks for audit/telemetry, health checks, and a CLI smoke test (`engram_memory-e2e`) you can run in CI against a real database.
 
 ## Documentation
 
@@ -47,7 +47,7 @@ Developer-focused guides live under [`docs/`](docs/):
 | [Getting started](docs/getting-started.md) | Install, LiteLLM check, first `ingest` / `recall` |
 | [Configuration](docs/configuration.md) | Environment variables, `Config`, `user_id` pattern |
 | [API overview](docs/api-overview.md) | Clients, models, exceptions |
-| [Production & operations](docs/production.md) | Health, `engram-e2e`, logging |
+| [Production & operations](docs/production.md) | Health, `engram_memory-e2e`, logging |
 
 On **PyPI**, the package metadata includes a **Documentation** URL that points to the same [`docs/` tree on GitHub](https://github.com/hackdavid/Engram/tree/main/docs).
 
@@ -83,13 +83,18 @@ asyncio.run(main())
 
 Use the **exact** model id (and `api_base` / `api_version` if required) in your **`LLM_*`** environment variables — see [Quick start](#quick-start).
 
-**Integration status:** the supported path is **`LiteLLMAdapter`** (`engram/llm/litellm_adapter.py`). Legacy adapters under `engram/llm/` may exist for reference; **new provider-specific integrations should prefer LiteLLM** or land as clean PRs — we are **open to contributions** (see below).
+**Integration status:** the supported path is **`LiteLLMAdapter`** (`engram_memory/llm/litellm_adapter.py`). Legacy adapters under `engram_memory/llm/` may exist for reference; **new provider-specific integrations should prefer LiteLLM** or land as clean PRs — we are **open to contributions** (see below).
 
 ---
 
 ## ✨ Features
 
 - **1 LLM call to ingest · 0 LLM calls to recall** — extract structured graph once; retrieve with vectors + traversal + scoring
+- **Slim context, minimal tokens** — only node summaries and relationship types are sent to the LLM (~735 tokens/ingest avg), not raw properties or embeddings
+- **Token tracking & cost estimation** — every `IngestResult` includes `tokens_prompt`, `tokens_completion`, `tokens_total` for precise cost monitoring
+- **Batched Neo4j writes** — nodes grouped by label and relationships grouped by type, written via `UNWIND` queries to minimize round-trips
+- **Single-query graph traversal** — variable-length Cypher replaces per-node BFS; one round-trip regardless of graph size
+- **Update-aware extraction** — LLM is instructed to update existing entities instead of creating duplicates, preventing graph bloat
 - **Dynamic graph schema** — labels, properties, and relationship types from the model, not hand-maintained DDL
 - **Async-first** — `AsyncMemoryClient` + sync `MemoryClient` wrapper
 - **Composite ranking** — `α·vector_similarity + β·decay^hops + γ·strength`
@@ -115,27 +120,27 @@ pip install -e .
 When Engram is on PyPI, a normal install will be:
 
 ```bash
-pip install engram
+pip install engram_memory
 ```
 
 (PyPI treats the name as case-insensitive, so `pip install Engram` will be equivalent.)
 
-Either path installs the **runtime stack**: Neo4j driver, Pydantic, LiteLLM, and **local embeddings** (SentenceTransformers + PyTorch) for `EMBEDDING_PROVIDER=local` (the default). If you use **`EMBEDDING_PROVIDER=openai`**, add the OpenAI SDK: `pip install engram[openai-embed]` (after PyPI) or `pip install -e ".[openai-embed]"` from a clone.
+Either path installs the **runtime stack**: Neo4j driver, Pydantic, LiteLLM, and **local embeddings** (SentenceTransformers + PyTorch) for `EMBEDDING_PROVIDER=local` (the default). If you use **`EMBEDDING_PROVIDER=openai`**, add the OpenAI SDK: `pip install engram_memory[openai-embed]` (after PyPI) or `pip install -e ".[openai-embed]"` from a clone.
 
 ## End-to-end validation (production smoke)
 
-Run from a directory that has `.env` or `engram/.env` configured (see [`.env.example`](.env.example)). Install first with `pip install -e .` from a clone, or from PyPI when it is available.
+Run from a directory that has `.env` or `engram_memory/.env` configured (see [`.env.example`](.env.example)). Install first with `pip install -e .` from a clone, or from PyPI when it is available.
 
 ### How to run
 
 | Use case | Command |
 |----------|---------|
-| **Default (recommended)** | `python -m engram.cli.e2e_validate` |
-| Same, from a Windows clone | `scripts\engram-e2e.cmd` (repo root) |
-| Pip console script (if on `PATH`) | `engram-e2e` |
+| **Default (recommended)** | `python -m engram_memory.cli.e2e_validate` |
+| Same, from a Windows clone | `scripts\engram_memory-e2e.cmd` (repo root) |
+| Pip console script (if on `PATH`) | `engram_memory-e2e` |
 | Clone, package not installed | `python scripts/e2e_validate.py` |
 
-On **Windows**, `engram-e2e` often fails with “not recognized” because Python’s **Scripts** folder is not on `PATH`. Prefer the **`python -m …`** row above, or add that `Scripts` directory to `PATH` (conda env, `%LocalAppData%\Programs\Python\Python3xx\Scripts`, etc.).
+On **Windows**, `engram_memory-e2e` often fails with “not recognized” because Python’s **Scripts** folder is not on `PATH`. Prefer the **`python -m …`** row above, or add that `Scripts` directory to `PATH` (conda env, `%LocalAppData%\Programs\Python\Python3xx\Scripts`, etc.).
 
 ### What the default run does
 
@@ -147,11 +152,11 @@ On **Windows**, `engram-e2e` often fails with “not recognized” because Pytho
 
 | Goal | How |
 |------|-----|
-| Retrieval only (no writes) | `python -m engram.cli.e2e_validate --skip-seed --user-id <id>` or set `E2E_USER_ID` |
+| Retrieval only (no writes) | `python -m engram_memory.cli.e2e_validate --skip-seed --user-id <id>` or set `E2E_USER_ID` |
 | One LLM call for all seed text | `--batch-seed` |
 | Tune wall-clock limits | `E2E_LLM_TIMEOUT_SEC` (default `120`), `E2E_INGEST_TIMEOUT_SEC` (default LLM timeout + 45s) |
 
-More options: `python -m engram.cli.e2e_validate --help`.
+More options: `python -m engram_memory.cli.e2e_validate --help`.
 
 ### Neo4j-only check
 
@@ -195,23 +200,24 @@ export LOG_FORMAT="json"                  # or "text"
 
 ```python
 import asyncio
-from engram import AsyncMemoryClient, Config
+from engram_memory import AsyncMemoryClient, Config
 
 async def main():
     config = Config()  # reads from environment variables
     async with AsyncMemoryClient(config) as client:
-        # await client.health_check(ping_llm=True)  # optional wiring check (LiteLLM ping)
+        # await client.health_check(ping_llm=True)  # optional wiring check
 
-        # Ingest a message
+        # Ingest a message (1 LLM call, batched Neo4j writes)
         result = await client.ingest(
             user_id="user-123",
             text="I work at Google as a senior engineer in the ML team.",
-            reference_id="msg-001",  # optional: link back to source message
+            reference_id="msg-001",
         )
         print(f"Created {len(result.nodes_created)} nodes, "
-              f"{result.relationships_created} relationships")
+              f"{result.relationships_created} relationships, "
+              f"{result.tokens_total} tokens used")
 
-        # Recall relevant context
+        # Recall relevant context (0 LLM calls)
         context = await client.recall(
             user_id="user-123",
             query="What does the user do for work?",
@@ -226,7 +232,7 @@ asyncio.run(main())
 ### 3. Sync Usage
 
 ```python
-from engram import MemoryClient, Config
+from engram_memory import MemoryClient, Config
 
 client = MemoryClient(Config())
 result = client.ingest(user_id="user-123", text="I love hiking in the mountains.")
@@ -238,64 +244,88 @@ client.close()
 
 ### Ingestion Pipeline
 
+Every call to `ingest(text)` follows this optimised path:
+
 ```
 User text
-  │
-  ▼
-Trivial filter ──► skip ("hi", "ok", "thanks")
-  │
-  ▼
+  |
+  v
+Trivial filter ------> skip ("hi", "ok", "thanks")   [0 LLM calls]
+  |
+  v
 Rate limiter (token bucket)
-  │
-  ▼
-Fetch neighbourhood (existing nodes for this user)
-  │
-  ▼
-LLM extraction ──► NodeInstruction[] + RelInstruction[]
-  │                  (1 LLM call with structured JSON output)
-  ▼
-For each node:
-  ├─ Embed summary (SentenceTransformer or OpenAI)
-  ├─ Build parameterised Cypher (MERGE + SET)
-  ├─ Execute against Neo4j
-  └─ Assign to cluster (HierarchyManager)
-  │
-  ▼
-Build relationships (MERGE with traversal metadata)
-  │
-  ▼
+  |
+  v
+Step 1: embed(text) -> query_vector                   [1 embedder call, reused below]
+  |
+  v
+Step 2: vector_search(query_vector, top_k=5)          [1 Neo4j call]
+         returns: elementId, label, summary, rel_types
+         (NO raw properties, NO embeddings -- slim context)
+  |
+  v
+Step 3: build_user_prompt(text + slim context)
+         ~50-100 tokens for 5 context nodes
+  |
+  v
+Step 4: LLM extraction -> nodes[] + rels[]            [1 LLM call]
+         token usage captured for cost tracking
+  |
+  v
+Step 5: Batch node upsert (UNWIND per label group)    [~2 Neo4j calls]
+         reuse text embedding when summary == text
+  |
+  v
+Step 6: Batch relationship MERGE (UNWIND per type)    [~1 Neo4j call]
+         resolve temp_N -> real elementIds
+  |
+  v
 Invalidate user cache
-  │
-  ▼
-Return IngestResult
+  |
+  v
+Return IngestResult (with token counts)
 ```
 
-### Retrieval Pipeline
+**Key design decisions:**
+
+- **Embedding reuse** -- the text embedding from step 1 is used for both context lookup and node storage; fresh embeddings are only computed for nodes whose summary differs from the input text.
+- **Slim LLM context** -- only node summaries and relationship type names are sent to the LLM, keeping prompt tokens minimal (~735 tokens/ingest on GPT-4-32k in benchmarks).
+- **Batched writes** -- nodes are grouped by label and written via `UNWIND` queries; relationships are grouped by type. A typical 4-node + 3-relationship ingest uses ~4 Neo4j round-trips instead of 7.
+- **Update-aware extraction** -- the LLM prompt explicitly instructs the model to emit `"operation": "update"` for entities already present in the context, preventing node duplication as the graph grows.
+
+### Recall Pipeline
 
 ```
 Query text
-  │
-  ▼
-Check per-user LRU cache ──► cache hit? return immediately
-  │
-  ▼
-Embed query
-  │
-  ▼
-Neo4j vector search (cosine similarity, top-K seeds)
-  │
-  ▼
-Decay-weighted BFS traversal
-  │  (expand from seeds, score *= decay per hop, stop at min_score)
-  ▼
-Composite scoring: α·similarity + β·decay^hops + γ·strength
-  │
-  ▼
+  |
+  v
+Check per-user LRU cache ------> cache hit? return immediately  [0 calls]
+  |
+  v
+Step 1: embed(query) -> query_vector          [1 embedder call]
+  |
+  v
+Step 2: Neo4j vector search (top-K seeds)     [1 Neo4j call]
+         properties cleaned: _embedding, _version, etc. stripped
+  |
+  v
+Step 3: Single variable-length Cypher          [1 Neo4j call]
+         MATCH path = (seed)-[*1..3]-(m)
+         returns ALL reachable nodes in 1 round-trip
+         (replaces N+1 per-node BFS queries)
+  |
+  v
+Step 4: Composite scoring
+         final_score = a * similarity + b * decay^hops + g * strength
+  |
+  v
 Rank and return top-K ScoredNode[]
-  │
-  ▼
+  |
+  v
 Cache result, return RecallResult
 ```
+
+**Zero LLM calls on the read path.** All intelligence was front-loaded at ingestion.
 
 ## Core Concepts
 
@@ -355,11 +385,17 @@ config = Config(
 
 ### Traversal
 
-After vector search returns seed nodes, BFS expands outward through relationships. Each hop multiplies the score by a decay factor. Expansion stops when:
+After vector search returns seed nodes, a **single variable-length Cypher query** expands outward through relationships in one Neo4j round-trip:
 
-- **Max depth reached** (default: 5 hops)
-- **Score drops below min_score** (default: 0.1)
-- **Node already visited** (cycle prevention)
+```cypher
+MATCH (seed) WHERE elementId(seed) IN $seedIds
+MATCH path = (seed)-[*1..3]-(m)
+WHERE m.userId = $userId AND m.isCurrent = true
+WITH DISTINCT m, min(length(path)) AS hops
+RETURN elementId(m) AS elementId, hops, m.strength AS strength, labels(m)[0] AS label
+```
+
+Each hop multiplies the score by a decay factor (`score = decay^hops`). Nodes whose score drops below `min_score` are filtered out in Python.
 
 ```python
 config = Config(
@@ -368,6 +404,8 @@ config = Config(
     traversal_min_score=0.15,  # prune weak paths earlier
 )
 ```
+
+This replaces the previous per-node BFS approach (which could generate 100+ individual queries) with a single round-trip regardless of graph size.
 
 ### Hierarchical Summary Tree
 
@@ -400,7 +438,7 @@ Before calling the LLM, Engram checks if the text is worth extracting. Short gre
 
 ```python
 # Add custom trivial patterns
-from engram.extractors.trivial_filter import is_trivial
+from engram_memory.extractors.trivial_filter import is_trivial
 is_trivial("skip this", custom_trivial_patterns=[r"skip this"])  # True
 ```
 
@@ -425,8 +463,8 @@ Every node carries a `_version` counter. When updating a node, you can pass `exp
 Extend Engram's lifecycle with custom hooks:
 
 ```python
-from engram.hooks.base import Hook
-from engram.models import IngestResult, RecallResult
+from engram_memory.hooks.base import Hook
+from engram_memory.models import IngestResult, RecallResult
 
 class AuditHook:
     """Log all ingest/recall events to an audit service."""
@@ -510,9 +548,9 @@ config = Config(
 
 | Method | Description |
 |--------|-------------|
-| `ingest(user_id, text, reference_id=None)` | Extract entities from text and store in the graph |
+| `ingest(user_id, text, reference_id=None)` | Embed text, fetch slim context, LLM extraction, batched graph upsert; returns token counts |
 | `ingest_batch(user_id, items)` | Ingest multiple messages (each `{"text": "...", "reference_id": "..."}`) |
-| `recall(user_id, query, top_k=10)` | Retrieve relevant memories ranked by composite score |
+| `recall(user_id, query, top_k=10)` | Vector search + single-query traversal + composite scoring; 0 LLM calls |
 | `search(user_id, query, top_k=10, detail_level="auto")` | Hierarchical search through summary tree |
 | `get_graph(user_id, page=1, page_size=100)` | Paginated snapshot of a user's memory graph |
 | `delete_memory(user_id, node_id, cascade=False)` | Delete a node (cascade removes relationships too) |
@@ -523,7 +561,7 @@ config = Config(
 
 | Model | Purpose |
 |-------|---------|
-| `IngestResult` | Response from `ingest()`: `skipped`, `nodes_created`, `nodes_updated`, `relationships_created` |
+| `IngestResult` | Response from `ingest()`: `skipped`, `nodes_created`, `nodes_updated`, `relationships_created`, `tokens_prompt`, `tokens_completion`, `tokens_total` |
 | `RecallResult` | Response from `recall()`: `nodes` (list of `ScoredNode`), `total_candidates`, `from_cache` |
 | `ScoredNode` | A node with `element_id`, `label`, `summary`, `score`, `hops_from_seed`, `properties` |
 | `GraphSnapshot` | Paginated graph view: `nodes`, `relationships`, `total_nodes`, pagination fields |
@@ -590,7 +628,7 @@ All fields can be set via environment variables (case-insensitive):
 ## Architecture
 
 ```
-engram/
+engram_memory/
 ├── __init__.py               # Public exports + lazy imports
 ├── _version.py               # "0.1.0"
 ├── client.py                 # AsyncMemoryClient + MemoryClient (sync wrapper)
@@ -601,11 +639,11 @@ engram/
 ├── rate_limiter.py           # Token-bucket rate limiter
 ├── graph/
 │   ├── driver.py             # Async Neo4j driver wrapper
-│   ├── engine.py             # Dynamic Cypher generator
+│   ├── engine.py             # Dynamic Cypher generator (single + batched UNWIND)
 │   ├── indexes.py            # Vector index management
 │   ├── migrations.py         # Schema versioning
 │   ├── sanitise.py           # Label/type sanitisation
-│   ├── traversal.py          # Decay-weighted BFS
+│   ├── traversal.py          # Single-query variable-length path traversal
 │   ├── scorer.py             # Composite scoring
 │   └── hierarchy.py          # Cluster summary tree
 ├── embeddings/
@@ -641,13 +679,57 @@ engram/
     └── weight_learning_task.py  # Scoring weight telemetry
 ```
 
+## Performance & Cost Model
+
+### Resource Consumption per Operation
+
+| Operation | LLM Calls | Embedder Calls | Neo4j Calls | Typical Latency |
+|-----------|-----------|----------------|-------------|-----------------|
+| Ingest (trivial) | 0 | 0 | 0 | ~1 ms |
+| Ingest (factual) | 1 | 1 + N (summary differs) | ~4 (batched) | ~5 s |
+| Recall (cache hit) | 0 | 0 | 0 | < 1 ms |
+| Recall (cache miss) | 0 | 1 | 2 | ~200 ms |
+| Search (hierarchical) | 0 | 1 | 1 | ~100 ms |
+| get_graph | 0 | 0 | 2 | ~50 ms |
+
+### Benchmark Results (12-document corpus, Azure GPT-4-32k)
+
+| Metric | Value |
+|--------|-------|
+| Avg tokens per ingest | 735 |
+| Total tokens (12 docs) | 8,823 |
+| Prompt / Completion split | 4,335 / 4,488 |
+| Avg nodes per ingest | 2.67 |
+| Ingest p50 / p95 | 4,982 ms / 6,680 ms |
+| Recall p50 / p95 | 200 ms / 368 ms |
+| MRR | 0.83 |
+| Precision@3 | 0.72 |
+| Recall@3 | 0.67 |
+
+Token usage is logged per-ingest in `IngestResult.tokens_prompt`, `tokens_completion`, and `tokens_total`, enabling precise cost tracking in production.
+
+### Cost Estimation
+
+The benchmark includes configurable per-model pricing. Example with Azure GPT-4-32k:
+
+| Metric | Value |
+|--------|-------|
+| Prompt cost | $0.06 / 1K tokens |
+| Completion cost | $0.12 / 1K tokens |
+| Cost per ingest | ~$0.07 |
+| Cost per 1K documents | ~$66.86 |
+
+Switch to a cheaper model (GPT-4o-mini, Claude Haiku) and these numbers drop by 10-50x.
+
+---
+
 ## 🤝 Contributing
 
 Engram is **open source**. We want you to **use it in production**, **report rough edges**, and **ship improvements**.
 
 - **Issues** — bugs, design questions, or provider-specific LiteLLM quirks (include model id, env vars you set, and redacted logs).
 - **Pull requests** — keep changes focused; add or extend **tests**; clone the repo and use `pip install -e ".[dev]"` for pytest/ruff, then `pytest tests/ -v`. Match existing style and typing.
-- **New LLM backends** — the supported integration is **`LiteLLMAdapter`**. If you need a path LiteLLM does not cover, open an issue first; we welcome clean adapters that follow `engram/llm/base.py` and include tests with mocks.
+- **New LLM backends** — the supported integration is **`LiteLLMAdapter`**. If you need a path LiteLLM does not cover, open an issue first; we welcome clean adapters that follow `engram_memory/llm/base.py` and include tests with mocks.
 
 Thank you for helping make agent memory **structured, fast, and boringly reliable**.
 

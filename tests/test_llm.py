@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from engram.exceptions import CircuitOpenError, ExtractionError
-from engram.llm.base import BaseLLM
+from engram_memory.exceptions import CircuitOpenError, ExtractionError
+from engram_memory.llm.base import BaseLLM
 
 
 def test_base_llm_is_abstract():
@@ -17,7 +17,7 @@ def test_base_llm_is_abstract():
 
 def _make_litellm_adapter(**kwargs):
     """Instantiate LiteLLMAdapter and swap its internal litellm ref with a mock."""
-    from engram.llm.litellm_adapter import LiteLLMAdapter
+    from engram_memory.llm.litellm_adapter import LiteLLMAdapter
 
     defaults = {"model": "gpt-4o-mini", "api_key": "sk-test"}
     defaults.update(kwargs)

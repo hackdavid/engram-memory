@@ -3,7 +3,7 @@
 import pytest
 import asyncio
 
-from engram.cache.lru_cache import MemoryCache
+from engram_memory.cache.lru_cache import MemoryCache
 
 
 @pytest.mark.asyncio

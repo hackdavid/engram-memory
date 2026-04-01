@@ -1,0 +1,620 @@
+{
+  "meta": {
+    "suite": "engram_memory live benchmark",
+    "timestamp_utc": "2026-04-01T15:01:16.505636+00:00",
+    "python_version": "3.12.4",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "sdk_version": "0.1.0"
+  },
+  "health": {
+    "neo4j_connected": true,
+    "llm_reachable": true,
+    "embedding_model_loaded": true,
+    "vector_index_exists": true,
+    "latency_ms": 1693.21
+  },
+  "ingest": {
+    "corpus_size": 12,
+    "latency": {
+      "count": 12,
+      "mean_ms": 6210.13,
+      "median_ms": 6339.75,
+      "p50_ms": 6339.75,
+      "p95_ms": 8720.69,
+      "p99_ms": 9659.15,
+      "max_ms": 9893.77,
+      "min_ms": 3298.04,
+      "stddev_ms": 1808.24,
+      "total_sec": 74.522
+    },
+    "throughput_ops_per_sec": 0.16,
+    "nodes_created_total": 31,
+    "nodes_updated_total": 1,
+    "relationships_created_total": 20,
+    "avg_nodes_per_ingest": 2.67,
+    "total_tokens_prompt": 5338,
+    "total_tokens_completion": 4344,
+    "total_tokens_all": 9682,
+    "avg_tokens_per_ingest": 806.8,
+    "per_document": [
+      {
+        "index": 0,
+        "domain": "engineering",
+        "reference_id": "eng-bench-23677d7c670e-0",
+        "skipped": false,
+        "nodes_created": 2,
+        "nodes_updated": 0,
+        "relationships_created": 2,
+        "latency_ms": 6579.01,
+        "tokens_prompt": 428,
+        "tokens_completion": 325,
+        "tokens_total": 753
+      },
+      {
+        "index": 1,
+        "domain": "engineering",
+        "reference_id": "eng-bench-23677d7c670e-1",
+        "skipped": false,
+        "nodes_created": 2,
+        "nodes_updated": 0,
+        "relationships_created": 1,
+        "latency_ms": 4093.63,
+        "tokens_prompt": 416,
+        "tokens_completion": 251,
+        "tokens_total": 667
+      },
+      {
+        "index": 2,
+        "domain": "engineering",
+        "reference_id": "eng-bench-23677d7c670e-2",
+        "skipped": false,
+        "nodes_created": 3,
+        "nodes_updated": 0,
+        "relationships_created": 2,
+        "latency_ms": 5747.3,
+        "tokens_prompt": 419,
+        "tokens_completion": 396,
+        "tokens_total": 815
+      },
+      {
+        "index": 3,
+        "domain": "healthcare",
+        "reference_id": "health-bench-23677d7c670e-3",
+        "skipped": false,
+        "nodes_created": 3,
+        "nodes_updated": 0,
+        "relationships_created": 2,
+        "latency_ms": 6052.29,
+        "tokens_prompt": 549,
+        "tokens_completion": 436,
+        "tokens_total": 985
+      },
+      {
+        "index": 4,
+        "domain": "healthcare",
+        "reference_id": "health-bench-23677d7c670e-4",
+        "skipped": false,
+        "nodes_created": 3,
+        "nodes_updated": 1,
+        "relationships_created": 2,
+        "latency_ms": 7368.85,
+        "tokens_prompt": 561,
+        "tokens_completion": 617,
+        "tokens_total": 1178
+      },
+      {
+        "index": 5,
+        "domain": "finance",
+        "reference_id": "fin-bench-23677d7c670e-5",
+        "skipped": false,
+        "nodes_created": 4,
+        "nodes_updated": 0,
+        "relationships_created": 3,
+        "latency_ms": 7760.89,
+        "tokens_prompt": 425,
+        "tokens_completion": 478,
+        "tokens_total": 903
+      },
+      {
+        "index": 6,
+        "domain": "finance",
+        "reference_id": "fin-bench-23677d7c670e-6",
+        "skipped": false,
+        "nodes_created": 2,
+        "nodes_updated": 0,
+        "relationships_created": 1,
+        "latency_ms": 3298.04,
+        "tokens_prompt": 418,
+        "tokens_completion": 241,
+        "tokens_total": 659
+      },
+      {
+        "index": 7,
+        "domain": "education",
+        "reference_id": "edu-bench-23677d7c670e-7",
+        "skipped": false,
+        "nodes_created": 2,
+        "nodes_updated": 0,
+        "relationships_created": 1,
+        "latency_ms": 4068.25,
+        "tokens_prompt": 435,
+        "tokens_completion": 315,
+        "tokens_total": 750
+      },
+      {
+        "index": 8,
+        "domain": "operations",
+        "reference_id": "ops-bench-23677d7c670e-8",
+        "skipped": false,
+        "nodes_created": 4,
+        "nodes_updated": 0,
+        "relationships_created": 3,
+        "latency_ms": 9893.77,
+        "tokens_prompt": 422,
+        "tokens_completion": 447,
+        "tokens_total": 869
+      },
+      {
+        "index": 9,
+        "domain": "operations",
+        "reference_id": "ops-bench-23677d7c670e-9",
+        "skipped": false,
+        "nodes_created": 2,
+        "nodes_updated": 0,
+        "relationships_created": 1,
+        "latency_ms": 6114.52,
+        "tokens_prompt": 419,
+        "tokens_completion": 279,
+        "tokens_total": 698
+      },
+      {
+        "index": 10,
+        "domain": "compliance",
+        "reference_id": "legal-bench-23677d7c670e-10",
+        "skipped": false,
+        "nodes_created": 2,
+        "nodes_updated": 0,
+        "relationships_created": 1,
+        "latency_ms": 6564.98,
+        "tokens_prompt": 424,
+        "tokens_completion": 279,
+        "tokens_total": 703
+      },
+      {
+        "index": 11,
+        "domain": "compliance",
+        "reference_id": "legal-bench-23677d7c670e-11",
+        "skipped": false,
+        "nodes_created": 2,
+        "nodes_updated": 0,
+        "relationships_created": 1,
+        "latency_ms": 6980.08,
+        "tokens_prompt": 422,
+        "tokens_completion": 280,
+        "tokens_total": 702
+      }
+    ]
+  },
+  "recall": {
+    "query_count": 12,
+    "latency": {
+      "count": 12,
+      "mean_ms": 105.55,
+      "median_ms": 94.76,
+      "p50_ms": 94.76,
+      "p95_ms": 161.43,
+      "p99_ms": 179.32,
+      "max_ms": 183.79,
+      "min_ms": 76.9,
+      "stddev_ms": 30.09,
+      "total_sec": 1.267
+    },
+    "throughput_ops_per_sec": 9.47,
+    "per_query": [
+      {
+        "index": 0,
+        "query": "Who migrated the payment service to CockroachDB?",
+        "expected_domain": "engineering",
+        "expected_entities": [
+          "Jordan Vega",
+          "CockroachDB"
+        ],
+        "entity_hits": {
+          "Jordan Vega": false,
+          "CockroachDB": true
+        },
+        "hit_rate": 0.5,
+        "nodes_returned": 2,
+        "total_candidates": 2,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.9322,
+        "latency_ms": 183.79
+      },
+      {
+        "index": 1,
+        "query": "What monitoring does the Kubernetes cluster use?",
+        "expected_domain": "engineering",
+        "expected_entities": [
+          "Prometheus",
+          "kube-prod-us-east"
+        ],
+        "entity_hits": {
+          "Prometheus": true,
+          "kube-prod-us-east": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 2,
+        "total_candidates": 2,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.9046,
+        "latency_ms": 76.9
+      },
+      {
+        "index": 2,
+        "query": "How long does the phoenix-deploy CI pipeline take?",
+        "expected_domain": "engineering",
+        "expected_entities": [
+          "phoenix-deploy",
+          "14"
+        ],
+        "entity_hits": {
+          "phoenix-deploy": true,
+          "14": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 5,
+        "total_candidates": 5,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.9306,
+        "latency_ms": 143.13
+      },
+      {
+        "index": 3,
+        "query": "Who leads cardiology at Lakeside General Hospital?",
+        "expected_domain": "healthcare",
+        "expected_entities": [
+          "Amara Okafor",
+          "Lakeside General"
+        ],
+        "entity_hits": {
+          "Amara Okafor": true,
+          "Lakeside General": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 10,
+        "total_candidates": 11,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.9499,
+        "latency_ms": 117.29
+      },
+      {
+        "index": 4,
+        "query": "What caused the diabetes referral increase?",
+        "expected_domain": "healthcare",
+        "expected_entities": [
+          "Type-2 diabetes",
+          "Luis Mendez"
+        ],
+        "entity_hits": {
+          "Type-2 diabetes": true,
+          "Luis Mendez": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 9,
+        "total_candidates": 9,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.915,
+        "latency_ms": 97.69
+      },
+      {
+        "index": 5,
+        "query": "What volatility model did Mei-Lin Chang develop?",
+        "expected_domain": "finance",
+        "expected_entities": [
+          "Sigma-7",
+          "Mei-Lin Chang"
+        ],
+        "entity_hits": {
+          "Sigma-7": true,
+          "Mei-Lin Chang": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 6,
+        "total_candidates": 6,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.942,
+        "latency_ms": 90.33
+      },
+      {
+        "index": 6,
+        "query": "Who heads the FX trading desk?",
+        "expected_domain": "finance",
+        "expected_entities": [
+          "Raj Patel"
+        ],
+        "entity_hits": {
+          "Raj Patel": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 8,
+        "total_candidates": 8,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.9288,
+        "latency_ms": 90.72
+      },
+      {
+        "index": 7,
+        "query": "Which professor teaches Advanced Machine Learning at MIT?",
+        "expected_domain": "education",
+        "expected_entities": [
+          "Elena Vasquez",
+          "CS-6140"
+        ],
+        "entity_hits": {
+          "Elena Vasquez": true,
+          "CS-6140": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 6,
+        "total_candidates": 6,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.9501,
+        "latency_ms": 87.45
+      },
+      {
+        "index": 8,
+        "query": "Where do visitors park for Building A?",
+        "expected_domain": "operations",
+        "expected_entities": [
+          "PARK-A",
+          "level 2"
+        ],
+        "entity_hits": {
+          "PARK-A": true,
+          "level 2": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 4,
+        "total_candidates": 4,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.9495,
+        "latency_ms": 93.25
+      },
+      {
+        "index": 9,
+        "query": "What food is available in the cafeteria on Thursdays?",
+        "expected_domain": "operations",
+        "expected_entities": [
+          "salad bar",
+          "Marco Bianchi"
+        ],
+        "entity_hits": {
+          "salad bar": true,
+          "Marco Bianchi": false
+        },
+        "hit_rate": 0.5,
+        "nodes_returned": 2,
+        "total_candidates": 2,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.8894,
+        "latency_ms": 85.85
+      },
+      {
+        "index": 10,
+        "query": "What does directive COMP-2025-003 require?",
+        "expected_domain": "compliance",
+        "expected_entities": [
+          "Naomi Tanaka",
+          "AES-256"
+        ],
+        "entity_hits": {
+          "Naomi Tanaka": true,
+          "AES-256": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 4,
+        "total_candidates": 4,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.8916,
+        "latency_ms": 103.92
+      },
+      {
+        "index": 11,
+        "query": "What were the GDPR audit findings?",
+        "expected_domain": "compliance",
+        "expected_entities": [
+          "DataShield",
+          "non-conformit"
+        ],
+        "entity_hits": {
+          "DataShield": true,
+          "non-conformit": true
+        },
+        "hit_rate": 1.0,
+        "nodes_returned": 6,
+        "total_candidates": 6,
+        "from_cache": false,
+        "reciprocal_rank": 1.0,
+        "top_score": 0.9124,
+        "latency_ms": 96.28
+      }
+    ]
+  },
+  "search": {
+    "query_count": 6,
+    "latency": {
+      "count": 6,
+      "mean_ms": 94.48,
+      "median_ms": 92.18,
+      "p50_ms": 92.18,
+      "p95_ms": 113.43,
+      "p99_ms": 117.5,
+      "max_ms": 118.52,
+      "min_ms": 79.48,
+      "stddev_ms": 13.36,
+      "total_sec": 0.567
+    },
+    "throughput_ops_per_sec": 10.58
+  },
+  "accuracy": {
+    "precision_at_k": {
+      "1": 1.0,
+      "3": 0.5833,
+      "5": 0.35,
+      "10": 0.175
+    },
+    "recall_at_k": {
+      "1": 0.75,
+      "3": 0.9167,
+      "5": 0.9167,
+      "10": 0.9167
+    },
+    "f1_at_k": {
+      "1": 0.8571,
+      "3": 0.7129,
+      "5": 0.5066,
+      "10": 0.2939
+    },
+    "mrr": 1.0,
+    "mean_hit_rate": 0.9167,
+    "queries_with_zero_results": 0
+  },
+  "scaling": {
+    "docs_added": 5,
+    "per_doc": [
+      {
+        "doc_index": 1,
+        "latency_ms": 3766.42
+      },
+      {
+        "doc_index": 2,
+        "latency_ms": 2097.63
+      },
+      {
+        "doc_index": 3,
+        "latency_ms": 3184.08
+      },
+      {
+        "doc_index": 4,
+        "latency_ms": 3933.25
+      },
+      {
+        "doc_index": 5,
+        "latency_ms": 3565.36
+      }
+    ],
+    "slope_ms_per_doc": 143.35,
+    "interpretation": "near-constant (O(1))"
+  },
+  "graph_stats": {
+    "total_nodes": 58,
+    "total_relationships": 55,
+    "nodes_per_ingest": 4.83,
+    "rels_per_ingest": 4.58,
+    "sample_labels": [
+      "ClusterSummary"
+    ]
+  },
+  "user_isolation": {
+    "secret_token": "SECRET_313d33519d",
+    "leaked": false,
+    "user_b_nodes_returned": 0,
+    "verdict": "PASS \u2014 isolation holds"
+  },
+  "discrimination": {
+    "tests": [
+      {
+        "query": "Where do visitors park?",
+        "target_domain": "operations",
+        "anti_domains": [
+          "finance",
+          "healthcare"
+        ],
+        "top3_domains_found": [
+          "operations"
+        ],
+        "contaminated": false
+      },
+      {
+        "query": "Who developed the Sigma-7 volatility model?",
+        "target_domain": "finance",
+        "anti_domains": [
+          "operations",
+          "education"
+        ],
+        "top3_domains_found": [
+          "finance",
+          "education"
+        ],
+        "contaminated": true
+      },
+      {
+        "query": "What did the GDPR audit find?",
+        "target_domain": "compliance",
+        "anti_domains": [
+          "engineering",
+          "operations"
+        ],
+        "top3_domains_found": [
+          "compliance"
+        ],
+        "contaminated": false
+      },
+      {
+        "query": "Who leads the cardiology department?",
+        "target_domain": "healthcare",
+        "anti_domains": [
+          "finance",
+          "engineering"
+        ],
+        "top3_domains_found": [
+          "healthcare"
+        ],
+        "contaminated": false
+      }
+    ],
+    "contamination_rate": 0.25,
+    "clean_rate": 0.75
+  },
+  "summary": {
+    "headline": "Engram-Memory SDK -- Live Benchmark Results",
+    "corpus_size": 12,
+    "query_count": 12,
+    "ingest_p50_ms": 6339.75,
+    "ingest_p95_ms": 8720.69,
+    "ingest_throughput": 0.16,
+    "recall_p50_ms": 94.76,
+    "recall_p95_ms": 161.43,
+    "recall_throughput": 9.47,
+    "search_p50_ms": 92.18,
+    "mrr": 1.0,
+    "precision_at_1": 1.0,
+    "precision_at_3": 0.5833,
+    "precision_at_5": 0.35,
+    "recall_at_3": 0.9167,
+    "f1_at_3": 0.7129,
+    "discrimination_clean_rate": 0.75,
+    "user_isolation": "PASS \u2014 isolation holds",
+    "total_nodes": 58,
+    "total_relationships": 55,
+    "scaling_slope_ms": 143.35,
+    "tokens_total_ingest": 9682,
+    "tokens_avg_per_ingest": 806.8,
+    "tokens_prompt_total": 5338,
+    "tokens_completion_total": 4344,
+    "estimated_cost_usd": 0.84156,
+    "cost_per_ingest_usd": 0.07013,
+    "cost_per_1k_docs_usd": 70.13
+  }
+}

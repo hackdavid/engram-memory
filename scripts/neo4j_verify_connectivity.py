@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Minimal Neo4j connectivity check (sync driver), same env vars as Engram.
 
-Loads `.env` then `engram/.env` from the repo root (non-overriding).
+Loads `.env` then `engram_memory/.env` from the repo root (non-overriding).
 
   NEO4J_URI      e.g. neo4j+s://xxxx.databases.neo4j.io or bolt+s://...
   NEO4J_USER
@@ -29,7 +29,7 @@ _ROOT = Path(__file__).resolve().parent.parent
 def main() -> int:
     if load_dotenv:
         load_dotenv(_ROOT / ".env", override=False)
-        load_dotenv(_ROOT / "engram" / ".env", override=False)
+        load_dotenv(_ROOT / "engram_memory" / ".env", override=False)
 
     uri = os.environ.get("NEO4J_URI", "").strip()
     user = os.environ.get("NEO4J_USER", "").strip()
@@ -38,7 +38,7 @@ def main() -> int:
     missing = [k for k, v in (("NEO4J_URI", uri), ("NEO4J_USER", user), ("NEO4J_PASSWORD", password)) if not v]
     if missing:
         print("Missing environment variables:", ", ".join(missing), file=sys.stderr)
-        print("Set them in .env / engram/.env or export before running.", file=sys.stderr)
+        print("Set them in .env / engram_memory/.env or export before running.", file=sys.stderr)
         return 1
 
     # Log host only (no credentials)

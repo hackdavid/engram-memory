@@ -3,9 +3,9 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from engram.hooks.base import Hook
-from engram.hooks.logger_hook import LoggerHook
-from engram.models import IngestResult, RecallResult
+from engram_memory.hooks.base import Hook
+from engram_memory.hooks.logger_hook import LoggerHook
+from engram_memory.models import IngestResult, RecallResult
 
 
 @pytest.mark.asyncio

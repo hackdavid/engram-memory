@@ -2,7 +2,7 @@
 
 import pytest
 
-from engram.models import (
+from engram_memory.models import (
     GraphSnapshot,
     HealthStatus,
     IngestResult,

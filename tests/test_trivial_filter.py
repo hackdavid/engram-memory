@@ -1,6 +1,6 @@
 """Phase 2: Trivial message filter tests."""
 
-from engram.extractors.trivial_filter import is_trivial
+from engram_memory.extractors.trivial_filter import is_trivial
 
 
 # ── Trivial messages ────────────────────────────────────────────────

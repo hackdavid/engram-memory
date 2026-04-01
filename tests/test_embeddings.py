@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from engram.embeddings.base import BaseEmbedding
+from engram_memory.embeddings.base import BaseEmbedding
 
 
 def test_base_embedding_is_abstract():
@@ -20,7 +20,7 @@ def test_sentence_transformer_encode():
     mock_model = MagicMock()
     mock_model.encode.return_value = np.array([[0.1, 0.2, 0.3]])
 
-    import engram.embeddings.sentence_transformer as st_mod
+    import engram_memory.embeddings.sentence_transformer as st_mod
 
     mock_pkg = MagicMock()
     mock_pkg.SentenceTransformer = MagicMock(return_value=mock_model)
@@ -41,7 +41,7 @@ def test_sentence_transformer_batch_encode():
     mock_model = MagicMock()
     mock_model.encode.return_value = np.array([[0.1, 0.2], [0.3, 0.4]])
 
-    import engram.embeddings.sentence_transformer as st_mod
+    import engram_memory.embeddings.sentence_transformer as st_mod
 
     mock_pkg = MagicMock()
     mock_pkg.SentenceTransformer = MagicMock(return_value=mock_model)
@@ -60,7 +60,7 @@ def test_sentence_transformer_dimensions():
     mock_model = MagicMock()
     mock_model.get_sentence_embedding_dimension.return_value = 384
 
-    import engram.embeddings.sentence_transformer as st_mod
+    import engram_memory.embeddings.sentence_transformer as st_mod
 
     mock_pkg = MagicMock()
     mock_pkg.SentenceTransformer = MagicMock(return_value=mock_model)
@@ -83,7 +83,7 @@ async def test_openai_embedding_encode():
         data=[MagicMock(embedding=[0.1, 0.2, 0.3])]
     )
 
-    import engram.embeddings.openai_embedding as oai_mod
+    import engram_memory.embeddings.openai_embedding as oai_mod
 
     original = oai_mod.AsyncOpenAI
     oai_mod.AsyncOpenAI = lambda **kw: mock_client
@@ -98,7 +98,7 @@ async def test_openai_embedding_encode():
 def test_openai_sync_encode_raises():
     mock_client = MagicMock()
 
-    import engram.embeddings.openai_embedding as oai_mod
+    import engram_memory.embeddings.openai_embedding as oai_mod
 
     original = oai_mod.AsyncOpenAI
     oai_mod.AsyncOpenAI = lambda **kw: mock_client
@@ -114,7 +114,7 @@ def test_openai_sync_encode_raises():
 
 
 def test_two_tier_quantize():
-    from engram.embeddings.two_tier import TwoTierEmbedder
+    from engram_memory.embeddings.two_tier import TwoTierEmbedder
 
     fine = [0.123, -0.456, 0.789]
     coarse = TwoTierEmbedder.quantize(fine)
@@ -123,7 +123,7 @@ def test_two_tier_quantize():
 
 
 def test_two_tier_quantize_empty():
-    from engram.embeddings.two_tier import TwoTierEmbedder
+    from engram_memory.embeddings.two_tier import TwoTierEmbedder
 
     assert TwoTierEmbedder.quantize([]) == []
 
@@ -133,7 +133,7 @@ def test_two_tier_wraps_base_embedder():
     mock_base.encode.return_value = [0.5, -0.3, 0.8]
     mock_base.dimensions = 3
 
-    from engram.embeddings.two_tier import TwoTierEmbedder
+    from engram_memory.embeddings.two_tier import TwoTierEmbedder
 
     two_tier = TwoTierEmbedder(base=mock_base)
     fine, coarse = two_tier.encode_both("test text")
@@ -147,7 +147,7 @@ def test_two_tier_dimensions():
     mock_base = MagicMock()
     mock_base.dimensions = 384
 
-    from engram.embeddings.two_tier import TwoTierEmbedder
+    from engram_memory.embeddings.two_tier import TwoTierEmbedder
 
     two_tier = TwoTierEmbedder(base=mock_base)
     assert two_tier.dimensions == 384

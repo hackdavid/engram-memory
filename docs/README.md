@@ -5,7 +5,7 @@
 | Resource | Link |
 |----------|------|
 | **Repository** | [github.com/hackdavid/Engram](https://github.com/hackdavid/Engram) |
-| **Install** | Clone [hackdavid/Engram](https://github.com/hackdavid/Engram) and `pip install -e .` until PyPI release; then `pip install engram` |
+| **Install** | Clone [hackdavid/Engram](https://github.com/hackdavid/Engram) and `pip install -e .` until PyPI release; then `pip install engram_memory` |
 | **License** | [MIT](https://github.com/hackdavid/Engram/blob/main/LICENSE) |
 
 ## Documentation map
@@ -15,14 +15,14 @@
 | [Getting started](getting-started.md) | Install, environment, verify LiteLLM, first `ingest` / `recall` |
 | [Configuration](configuration.md) | `Config`, environment variables, `user_id` rules, embeddings |
 | [API overview](api-overview.md) | Clients, models, exceptions, async vs sync |
-| [Production & operations](production.md) | Health checks, `engram-e2e`, live tests, hooks, logging |
+| [Production & operations](production.md) | Health checks, `engram_memory-e2e`, live tests, hooks, logging |
 
 The [root README](https://github.com/hackdavid/Engram/blob/main/README.md) remains the high-level product overview, feature list, and full configuration table.
 
 ## Quick orientation
 
-1. **Ingest** — One LiteLLM call per non-trivial message extracts nodes and relationships; embeddings are written to Neo4j.
-2. **Recall** — Query embedding + vector index + graph traversal + composite scoring; **no** LLM on this path.
+1. **Ingest** — Embed text, vector-search for top-5 similar nodes (slim context: summaries + rel types only), one LLM call for extraction, batched `UNWIND` writes to Neo4j. Token usage tracked per call.
+2. **Recall** — Embed query, vector search for seeds, single variable-length Cypher traversal (1 round-trip), composite scoring. **Zero LLM calls** on the read path.
 3. **Isolation** — All graph data is scoped by `user_id` (validated against a configurable regex).
 
 Start with [Getting started](getting-started.md), then keep [Configuration](configuration.md) and [Production & operations](production.md) nearby when you deploy.

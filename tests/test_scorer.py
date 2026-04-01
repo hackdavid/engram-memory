@@ -2,7 +2,7 @@
 
 import pytest
 
-from engram.graph.scorer import CompositeScorer
+from engram_memory.graph.scorer import CompositeScorer
 
 
 @pytest.fixture

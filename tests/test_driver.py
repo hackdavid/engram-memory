@@ -21,7 +21,7 @@ def mock_neo4j_driver():
 
 @pytest.mark.asyncio
 async def test_driver_executes_query(mock_neo4j_driver):
-    from engram.graph.driver import GraphDriver
+    from engram_memory.graph.driver import GraphDriver
 
     driver_mock, session_mock = mock_neo4j_driver
 
@@ -39,7 +39,7 @@ async def test_driver_executes_query(mock_neo4j_driver):
     mock_result.__aiter__ = async_iter
     session_mock.run.return_value = mock_result
 
-    with patch("engram.graph.driver.AsyncGraphDatabase") as mock_agd:
+    with patch("engram_memory.graph.driver.AsyncGraphDatabase") as mock_agd:
         mock_agd.driver.return_value = driver_mock
         gd = GraphDriver(uri="bolt://localhost:7687", user="neo4j", password="test")
         result = await gd.execute("RETURN 1 AS n")
@@ -49,12 +49,12 @@ async def test_driver_executes_query(mock_neo4j_driver):
 
 @pytest.mark.asyncio
 async def test_driver_ping_success(mock_neo4j_driver):
-    from engram.graph.driver import GraphDriver
+    from engram_memory.graph.driver import GraphDriver
 
     driver_mock, session_mock = mock_neo4j_driver
     session_mock.run.return_value = AsyncMock()
 
-    with patch("engram.graph.driver.AsyncGraphDatabase") as mock_agd:
+    with patch("engram_memory.graph.driver.AsyncGraphDatabase") as mock_agd:
         mock_agd.driver.return_value = driver_mock
         gd = GraphDriver(uri="bolt://localhost:7687", user="neo4j", password="test")
         assert await gd.ping() is True
@@ -62,9 +62,9 @@ async def test_driver_ping_success(mock_neo4j_driver):
 
 @pytest.mark.asyncio
 async def test_driver_ping_failure():
-    from engram.graph.driver import GraphDriver
+    from engram_memory.graph.driver import GraphDriver
 
-    with patch("engram.graph.driver.AsyncGraphDatabase") as mock_agd:
+    with patch("engram_memory.graph.driver.AsyncGraphDatabase") as mock_agd:
         mock_agd.driver.side_effect = Exception("conn refused")
         gd = GraphDriver(uri="bolt://bad:7687", user="neo4j", password="test")
         assert await gd.ping() is False
@@ -72,10 +72,10 @@ async def test_driver_ping_failure():
 
 @pytest.mark.asyncio
 async def test_driver_close(mock_neo4j_driver):
-    from engram.graph.driver import GraphDriver
+    from engram_memory.graph.driver import GraphDriver
 
     driver_mock, _ = mock_neo4j_driver
-    with patch("engram.graph.driver.AsyncGraphDatabase") as mock_agd:
+    with patch("engram_memory.graph.driver.AsyncGraphDatabase") as mock_agd:
         mock_agd.driver.return_value = driver_mock
         gd = GraphDriver(uri="bolt://localhost:7687", user="neo4j", password="test")
         await gd.close()
@@ -84,9 +84,9 @@ async def test_driver_close(mock_neo4j_driver):
 
 @pytest.mark.asyncio
 async def test_driver_default_database():
-    from engram.graph.driver import GraphDriver
+    from engram_memory.graph.driver import GraphDriver
 
-    with patch("engram.graph.driver.AsyncGraphDatabase") as mock_agd:
+    with patch("engram_memory.graph.driver.AsyncGraphDatabase") as mock_agd:
         mock_agd.driver.return_value = MagicMock()
         gd = GraphDriver(uri="bolt://localhost:7687", user="neo4j", password="test")
         assert gd._database == "neo4j"

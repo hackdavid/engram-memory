@@ -2,8 +2,8 @@
 
 import pytest
 
-from engram.exceptions import InvalidUserIdError
-from engram.graph.sanitise import sanitise_label, sanitise_rel_type, validate_user_id
+from engram_memory.exceptions import InvalidUserIdError
+from engram_memory.graph.sanitise import sanitise_label, sanitise_rel_type, validate_user_id
 
 
 # ── sanitise_label ──────────────────────────────────────────────────

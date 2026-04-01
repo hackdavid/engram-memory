@@ -12,16 +12,16 @@ Interpret flags on `HealthStatus` (Neo4j connectivity, embedder loaded, vector i
 
 ## Smoke test CLI
 
-Configure `.env` / `engram/.env`, then install from the repo (`pip install -e .`) or PyPI when available.
+Configure `.env` / `engram_memory/.env`, then install from the repo (`pip install -e .`) or PyPI when available.
 
 | Use case | Command |
 |----------|---------|
-| Recommended | `python -m engram.cli.e2e_validate` |
-| Windows clone helper | `scripts\engram-e2e.cmd` |
-| Pip script (if on `PATH`) | `engram-e2e` |
+| Recommended | `python -m engram_memory.cli.e2e_validate` |
+| Windows clone helper | `scripts\engram_memory-e2e.cmd` |
+| Pip script (if on `PATH`) | `engram_memory-e2e` |
 | No package install | `python scripts/e2e_validate.py` |
 
-On Windows, prefer `python -m …` if `engram-e2e` is not found (Scripts not on `PATH`).
+On Windows, prefer `python -m …` if `engram_memory-e2e` is not found (Scripts not on `PATH`).
 
 | Flag / env | Purpose |
 |------------|---------|
@@ -37,6 +37,16 @@ Run in CI against a dedicated Neo4j instance. Full options: `--help`.
 
 - Set **`LOG_FORMAT=json`** for centralized log aggregation.
 - Correlate logs with your `user_id` and `reference_id` in application-level fields where possible.
+
+## Token tracking & cost monitoring
+
+Every `IngestResult` includes `tokens_prompt`, `tokens_completion`, and `tokens_total`, enabling per-call cost monitoring in production. Use these fields to:
+
+- Track LLM spend per user or per document
+- Set alerts when token usage exceeds thresholds
+- Compare models for cost-efficiency
+
+The benchmark suite (`tests/test_live_benchmark.py`) includes configurable per-model pricing and generates cost estimates in `benchmarks/benchmark_report.json`.
 
 ## Rate limits and resilience
 

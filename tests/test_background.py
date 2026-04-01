@@ -4,7 +4,7 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock
 
-from engram.background.runner import BackgroundRunner
+from engram_memory.background.runner import BackgroundRunner
 
 
 @pytest.mark.asyncio

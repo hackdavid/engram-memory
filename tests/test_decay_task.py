@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from engram.background.decay_task import DecayTask
+from engram_memory.background.decay_task import DecayTask
 
 
 @pytest.mark.asyncio

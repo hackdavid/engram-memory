@@ -24,13 +24,13 @@ Engram loads settings from the **`Config`** object (`pydantic-settings`). You ca
 | `LLM_RATE_LIMIT_BURST` | `10` | |
 | `LLM_REQUEST_TIMEOUT` | — | Seconds; passed through to LiteLLM/HTTP client |
 
-The wired adapter is **`LiteLLMAdapter`** (`engram/llm/litellm_adapter.py`). Other files under `engram/llm/` are legacy references unless you contribute a new integration.
+The wired adapter is **`LiteLLMAdapter`** (`engram_memory/llm/litellm_adapter.py`). Other files under `engram_memory/llm/` are legacy references unless you contribute a new integration.
 
 ## Embeddings
 
 | Variable | Default | Notes |
 |----------|---------|--------|
-| `EMBEDDING_PROVIDER` | `local` | `local` (SentenceTransformers, bundled with `pip install engram`) or `openai` (add `pip install engram[openai-embed]`) |
+| `EMBEDDING_PROVIDER` | `local` | `local` (SentenceTransformers, bundled with `pip install engram_memory`) or `openai` (add `pip install engram_memory[openai-embed]`) |
 | `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Must match dimension below for existing indexes |
 | `EMBEDDING_DIMENSIONS` | `384` | Must match the vector index in Neo4j |
 | `EMBEDDING_API_KEY` | — | For `openai` provider |
@@ -40,14 +40,16 @@ Changing model or dimensions on an existing database may require index migration
 
 ## Retrieval scoring & traversal
 
+Traversal uses a **single variable-length Cypher query** (`MATCH path = (seed)-[*1..N]-(m)`) instead of per-node BFS, collapsing the entire graph expansion into one Neo4j round-trip.
+
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `SCORE_ALPHA` | `0.50` | Weight for vector similarity |
 | `SCORE_BETA` | `0.35` | Weight for hop decay term |
 | `SCORE_GAMMA` | `0.15` | Weight for node strength |
-| `TRAVERSAL_DECAY` | `0.5` | Per-hop score multiplier during BFS |
+| `TRAVERSAL_DECAY` | `0.5` | Per-hop score multiplier (`score = decay^hops`) |
 | `TRAVERSAL_MAX_DEPTH` | `5` | Max graph hops from seed nodes |
-| `TRAVERSAL_MIN_SCORE` | `0.1` | Prune paths below this score |
+| `TRAVERSAL_MIN_SCORE` | `0.1` | Prune nodes with score below this threshold |
 
 ## Memory decay (background)
 
@@ -94,7 +96,7 @@ Cache is invalidated on ingest for the affected `user_id`.
 ## Programmatic `Config`
 
 ```python
-from engram import Config
+from engram_memory import Config
 
 config = Config(
     neo4j_uri="bolt://localhost:7687",

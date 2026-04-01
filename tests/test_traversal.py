@@ -1,9 +1,9 @@
-"""Phase 3: Decay-weighted BFS traversal tests."""
+"""Phase 3: Decay-weighted graph traversal tests (single-query implementation)."""
 
 import pytest
 from unittest.mock import AsyncMock
 
-from engram.graph.traversal import TraversalEngine
+from engram_memory.graph.traversal import TraversalEngine
 
 
 @pytest.fixture
@@ -13,12 +13,10 @@ def mock_driver():
 
 @pytest.mark.asyncio
 async def test_traversal_from_single_seed(mock_driver):
-    mock_driver.execute.side_effect = [
-        [{"elementId": "n1", "score": 0.8, "label": "Person"},
-         {"elementId": "n2", "score": 0.7, "label": "Company"}],
-        [{"elementId": "n3", "score": 0.5, "label": "Skill"}],
-        [],
-        [],  # expansion of n3 at depth 2
+    mock_driver.execute.return_value = [
+        {"elementId": "n1", "hops": 1, "strength": 0.8, "label": "Person"},
+        {"elementId": "n2", "hops": 1, "strength": 0.7, "label": "Company"},
+        {"elementId": "n3", "hops": 2, "strength": 0.5, "label": "Skill"},
     ]
     engine = TraversalEngine(driver=mock_driver, decay=0.5, max_depth=3, min_score=0.1)
     results = await engine.traverse(
@@ -26,6 +24,7 @@ async def test_traversal_from_single_seed(mock_driver):
         user_id="u1",
     )
     eids = {r["elementId"] for r in results}
+    assert "s1" in eids
     assert "n1" in eids
     assert "n2" in eids
     assert "n3" in eids
@@ -35,7 +34,8 @@ async def test_traversal_from_single_seed(mock_driver):
 @pytest.mark.asyncio
 async def test_traversal_respects_max_depth(mock_driver):
     mock_driver.execute.return_value = [
-        {"elementId": f"n{i}", "score": 0.9, "label": "Node"} for i in range(10)
+        {"elementId": "n1", "hops": 1, "strength": 0.9, "label": "Node"},
+        {"elementId": "n2", "hops": 1, "strength": 0.9, "label": "Node"},
     ]
     engine = TraversalEngine(driver=mock_driver, decay=0.5, max_depth=1, min_score=0.01)
     results = await engine.traverse(
@@ -48,8 +48,9 @@ async def test_traversal_respects_max_depth(mock_driver):
 
 @pytest.mark.asyncio
 async def test_traversal_stops_below_min_score(mock_driver):
+    # decay=0.5 at hops=4 -> 0.5^4 = 0.0625 < min_score=0.1 -> filtered out
     mock_driver.execute.return_value = [
-        {"elementId": "n1", "score": 0.05, "label": "Node"}
+        {"elementId": "n1", "hops": 4, "strength": 0.05, "label": "Node"},
     ]
     engine = TraversalEngine(driver=mock_driver, decay=0.5, max_depth=5, min_score=0.1)
     results = await engine.traverse(
@@ -61,22 +62,18 @@ async def test_traversal_stops_below_min_score(mock_driver):
 
 
 @pytest.mark.asyncio
-async def test_traversal_no_cycles(mock_driver):
-    call_count = 0
-
-    async def side_effect(query, **params):
-        nonlocal call_count
-        call_count += 1
-        if call_count <= 2:
-            return [{"elementId": "s1", "score": 0.9, "label": "Node"}]
-        return []
-
-    mock_driver.execute.side_effect = side_effect
+async def test_traversal_no_duplicate_seeds(mock_driver):
+    """Seed nodes returned by the Cypher query should not be duplicated."""
+    mock_driver.execute.return_value = [
+        {"elementId": "s1", "hops": 1, "strength": 0.9, "label": "Node"},
+        {"elementId": "n1", "hops": 1, "strength": 0.8, "label": "Node"},
+    ]
     engine = TraversalEngine(driver=mock_driver, decay=0.5, max_depth=5, min_score=0.1)
     results = await engine.traverse(
         seeds=[{"elementId": "s1", "score": 1.0}], user_id="u1"
     )
-    assert call_count <= 5
+    s1_entries = [r for r in results if r["elementId"] == "s1"]
+    assert len(s1_entries) == 1
 
 
 @pytest.mark.asyncio
@@ -84,6 +81,7 @@ async def test_traversal_empty_seeds(mock_driver):
     engine = TraversalEngine(driver=mock_driver, decay=0.5, max_depth=3, min_score=0.1)
     results = await engine.traverse(seeds=[], user_id="u1")
     assert results == []
+    mock_driver.execute.assert_not_called()
 
 
 @pytest.mark.asyncio

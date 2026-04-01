@@ -3,7 +3,7 @@
 ## Public imports
 
 ```python
-from engram import (
+from engram_memory import (
     __version__,
     Config,
     AsyncMemoryClient,  # preferred for asyncio
@@ -11,7 +11,7 @@ from engram import (
 )
 ```
 
-Deeper types (`IngestResult`, `RecallResult`, `ScoredNode`, …) live in `engram.models` and `engram.exceptions`.
+Deeper types (`IngestResult`, `RecallResult`, `ScoredNode`, …) live in `engram_memory.models` and `engram_memory.exceptions`.
 
 ## Client lifecycle
 
@@ -35,9 +35,9 @@ with MemoryClient(config) as client:
 
 | Method | Role |
 |--------|------|
-| `ingest(user_id, text, reference_id=None)` | LLM extraction + graph upsert + embed |
+| `ingest(user_id, text, reference_id=None)` | Embed text, fetch slim context (top-5 similar nodes), LLM extraction, batched graph upsert; returns token counts |
 | `ingest_batch(user_id, items)` | Multiple dicts with `text` and optional `reference_id` |
-| `recall(user_id, query, top_k=10)` | Vector seeds + BFS + composite score |
+| `recall(user_id, query, top_k=10)` | Vector search + single-query graph traversal + composite scoring; 0 LLM calls |
 | `search(user_id, query, top_k=10, detail_level="auto")` | Hierarchical / cluster-aware search |
 | `get_graph(user_id, page=1, page_size=100)` | Paginated nodes and relationships |
 | `delete_memory(user_id, node_id, cascade=False)` | Delete one node |
@@ -50,7 +50,7 @@ Sync `MemoryClient` exposes the same operations as blocking wrappers.
 
 | Type | Fields you typically use |
 |------|---------------------------|
-| `IngestResult` | `skipped`, `nodes_created`, `nodes_updated`, `relationships_created` |
+| `IngestResult` | `skipped`, `nodes_created`, `nodes_updated`, `relationships_created`, `tokens_prompt`, `tokens_completion`, `tokens_total` |
 | `RecallResult` | `nodes` (`ScoredNode`), `total_candidates`, `from_cache` |
 | `ScoredNode` | `element_id`, `label`, `summary`, `score`, `hops_from_seed`, `properties` |
 | `GraphSnapshot` | `nodes`, `relationships`, pagination metadata |
@@ -72,12 +72,31 @@ All inherit from `EngramError`. Common cases:
 | `ConcurrentModificationError` | Optimistic locking conflict |
 | `MigrationError` | Schema migration failure |
 
-Import from `engram.exceptions` when you need to catch specific failures.
+Import from `engram_memory.exceptions` when you need to catch specific failures.
 
 ## Hooks
 
 The `Hook` protocol and `LoggerHook` live under `engram.hooks`. Use them to wrap or instrument `ingest` / `recall` in your application layer (audit, redaction, metrics). See **Plugin Hooks** in the [main README](https://github.com/hackdavid/Engram/blob/main/README.md#plugin-hooks).
 
 ## Pipelines (conceptual)
+
+### Ingest flow
+
+1. `embed(text)` -- compute query vector (reused for node storage)
+2. `vector_search(query_vector, top_k=5)` -- fetch slim context (elementId, label, summary, rel_types only)
+3. `build_user_prompt(text + slim context)` -- minimal tokens for LLM
+4. LLM extraction -- 1 call, returns `NodeInstruction[]` + `RelInstruction[]`
+5. Batched node upsert -- `UNWIND` per label group
+6. Batched relationship MERGE -- `UNWIND` per relationship type
+7. Return `IngestResult` with token counts
+
+### Recall flow
+
+1. Check LRU cache -- return immediately on hit
+2. `embed(query)` -- compute query vector
+3. Neo4j vector search -- top-K seed nodes
+4. Single variable-length Cypher traversal -- all reachable nodes in 1 round-trip
+5. Composite scoring and ranking
+6. Cache result, return `RecallResult`
 
 Detailed ASCII diagrams live in the [main README](https://github.com/hackdavid/Engram/blob/main/README.md#how-it-works) under **How It Works**.

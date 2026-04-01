@@ -1,6 +1,6 @@
 """Phase 1: Verify constants are defined with correct types and values."""
 
-from engram.constants import (
+from engram_memory.constants import (
     DEFAULT_CACHE_TTL_SECONDS,
     DEFAULT_SCORE_ALPHA,
     DEFAULT_SCORE_BETA,

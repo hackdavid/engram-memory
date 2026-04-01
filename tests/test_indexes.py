@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from engram.exceptions import EmbeddingDimensionMismatchError
-from engram.graph.indexes import IndexManager
+from engram_memory.exceptions import EmbeddingDimensionMismatchError
+from engram_memory.graph.indexes import IndexManager
 
 
 @pytest.mark.asyncio

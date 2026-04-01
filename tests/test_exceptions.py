@@ -1,6 +1,6 @@
 """Phase 1: Verify exception hierarchy and messages."""
 
-from engram.exceptions import (
+from engram_memory.exceptions import (
     CircuitOpenError,
     ConcurrentModificationError,
     ConfigurationError,

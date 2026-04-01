@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from engram.config import Config
+from engram_memory.config import Config
 
 
 def _make_config(**overrides):
