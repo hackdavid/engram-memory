@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from engram.graph.traversal import TraversalEngine
+from engram_memory.graph.traversal import TraversalEngine
 
 
 @pytest.fixture

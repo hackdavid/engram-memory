@@ -2,7 +2,7 @@
 
 import pytest
 
-from engram.graph.engine import CypherEngine
+from engram_memory.graph.engine import CypherEngine
 
 
 @pytest.fixture

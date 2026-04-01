@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from engram.exceptions import HasRelationshipsError, InvalidUserIdError
-from engram.models import IngestResult, RecallResult
+from engram_memory.exceptions import HasRelationshipsError, InvalidUserIdError
+from engram_memory.models import IngestResult, RecallResult
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def mock_components():
 
 
 def _make_client(mock_components):
-    from engram.client import AsyncMemoryClient
+    from engram_memory.client import AsyncMemoryClient
 
     client = AsyncMemoryClient.__new__(AsyncMemoryClient)
     client._init_from_mocks(**mock_components)
@@ -38,7 +38,7 @@ def _make_client(mock_components):
 @pytest.mark.asyncio
 async def test_ingest_trivial_message_skips(mock_components):
     client = _make_client(mock_components)
-    with patch("engram.client.is_trivial", return_value=True):
+    with patch("engram_memory.client.is_trivial", return_value=True):
         result = await client.ingest(user_id="u1", text="ok thanks")
     assert result.skipped is True
     mock_components["extractor"].extract.assert_not_called()
@@ -58,7 +58,7 @@ async def test_ingest_factual_calls_extractor(mock_components):
     )
     mock_components["engine"].build_upsert.return_value = ("MERGE ...", {"p": 1})
 
-    with patch("engram.client.is_trivial", return_value=False):
+    with patch("engram_memory.client.is_trivial", return_value=False):
         result = await client.ingest(user_id="u1", text="I work at Google")
     assert result.skipped is False
     mock_components["extractor"].extract.assert_awaited_once()
@@ -78,7 +78,7 @@ async def test_ingest_with_reference_id(mock_components):
     )
     mock_components["engine"].build_upsert.return_value = ("Q", {})
 
-    with patch("engram.client.is_trivial", return_value=False):
+    with patch("engram_memory.client.is_trivial", return_value=False):
         await client.ingest(user_id="u1", text="test", reference_id="ref-99")
     call_kwargs = mock_components["engine"].build_upsert.call_args
     assert "ref-99" in str(call_kwargs)
@@ -91,7 +91,7 @@ async def test_ingest_invalidates_cache(mock_components):
     mock_components["driver"].execute.return_value = []
     mock_components["extractor"].extract.return_value = ([], [])
 
-    with patch("engram.client.is_trivial", return_value=False):
+    with patch("engram_memory.client.is_trivial", return_value=False):
         await client.ingest(user_id="u1", text="test")
     mock_components["cache"].invalidate_user.assert_awaited_with("u1")
 
@@ -111,7 +111,7 @@ async def test_ingest_creates_relationships(mock_components):
     mock_components["engine"].build_upsert.return_value = ("MERGE ...", {})
     mock_components["engine"].build_relationship.return_value = ("MATCH ...", {})
 
-    with patch("engram.client.is_trivial", return_value=False):
+    with patch("engram_memory.client.is_trivial", return_value=False):
         result = await client.ingest(user_id="u1", text="test")
     assert result.relationships_created == 1
     mock_components["engine"].build_relationship.assert_called_once()
@@ -127,7 +127,7 @@ async def test_ingest_batch_processes_non_trivial_only(mock_components):
     mock_components["driver"].execute.return_value = []
     mock_components["extractor"].extract.return_value = ([], [])
 
-    with patch("engram.client.is_trivial", side_effect=[True, False, True]):
+    with patch("engram_memory.client.is_trivial", side_effect=[True, False, True]):
         results = await client.ingest_batch(
             user_id="u1",
             items=[
@@ -252,7 +252,7 @@ async def test_delete_rejects_invalid_user_id(mock_components):
 
 @pytest.mark.asyncio
 async def test_health_check_delegates(mock_components):
-    from engram.models import HealthStatus
+    from engram_memory.models import HealthStatus
 
     client = _make_client(mock_components)
     mock_components["health_checker"].check.return_value = HealthStatus(
@@ -283,7 +283,7 @@ async def test_search_uses_hierarchy(mock_components):
 
 
 def test_sync_client_class_exists():
-    from engram.client import MemoryClient
+    from engram_memory.client import MemoryClient
 
     assert hasattr(MemoryClient, "ingest")
     assert hasattr(MemoryClient, "recall")

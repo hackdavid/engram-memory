@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from engram.graph.hierarchy import HierarchyManager
+from engram_memory.graph.hierarchy import HierarchyManager
 
 
 @pytest.fixture

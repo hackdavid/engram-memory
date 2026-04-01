@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from engram.graph.migrations import MigrationRunner
+from engram_memory.graph.migrations import MigrationRunner
 
 
 @pytest.mark.asyncio

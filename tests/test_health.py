@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from engram.health.checks import HealthChecker
+from engram_memory.health.checks import HealthChecker
 
 
 @pytest.mark.asyncio

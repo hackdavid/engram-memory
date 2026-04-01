@@ -3,7 +3,7 @@
 ## Public imports
 
 ```python
-from engram import (
+from engram_memory import (
     __version__,
     Config,
     AsyncMemoryClient,  # preferred for asyncio
@@ -11,7 +11,7 @@ from engram import (
 )
 ```
 
-Deeper types (`IngestResult`, `RecallResult`, `ScoredNode`, …) live in `engram.models` and `engram.exceptions`.
+Deeper types (`IngestResult`, `RecallResult`, `ScoredNode`, …) live in `engram_memory.models` and `engram_memory.exceptions`.
 
 ## Client lifecycle
 
@@ -72,7 +72,7 @@ All inherit from `EngramError`. Common cases:
 | `ConcurrentModificationError` | Optimistic locking conflict |
 | `MigrationError` | Schema migration failure |
 
-Import from `engram.exceptions` when you need to catch specific failures.
+Import from `engram_memory.exceptions` when you need to catch specific failures.
 
 ## Hooks
 

@@ -3,9 +3,9 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from engram.exceptions import ExtractionError
-from engram.extractors.llm_extractor import LLMExtractor
-from engram.models import NodeInstruction, RelInstruction
+from engram_memory.exceptions import ExtractionError
+from engram_memory.extractors.llm_extractor import LLMExtractor
+from engram_memory.models import NodeInstruction, RelInstruction
 
 
 @pytest.fixture

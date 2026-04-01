@@ -1,9 +1,9 @@
 ---
 name: Engram SDK
-overview: "Build engram/ -- a standalone, framework-agnostic graph memory SDK. LLM-driven dynamic schema, 1 LLM call for ingestion (0 for trivial messages), 0 LLM calls for retrieval. Neo4j only, no relational DB. Developer passes optional reference_id to link graph nodes to their own external storage. Future: hierarchical summary tree for constant-time retrieval at scale."
+overview: "Build engram_memory/ -- a standalone, framework-agnostic graph memory SDK. LLM-driven dynamic schema, 1 LLM call for ingestion (0 for trivial messages), 0 LLM calls for retrieval. Neo4j only, no relational DB. Developer passes optional reference_id to link graph nodes to their own external storage. Future: hierarchical summary tree for constant-time retrieval at scale."
 todos:
   - id: scaffold
-    content: "Create engram/ package scaffold: __init__.py, config.py, exceptions.py, models.py (Pydantic contracts), pyproject.toml, requirements.txt"
+    content: "Create engram_memory/ package scaffold: __init__.py, config.py, exceptions.py, models.py (Pydantic contracts), pyproject.toml, requirements.txt"
     status: pending
   - id: llm-layer
     content: Build llm/base.py (BaseLLM ABC with generate_json) + llm/anthropic_adapter.py + llm/openai_adapter.py (stub)
@@ -58,7 +58,7 @@ flowchart TB
         AppDB["App's own DB"]
     end
 
-    subgraph sdk [engram]
+    subgraph sdk [engram_memory]
         Client["MemoryClient"]
         TrivialFilter["Trivial Message Filter"]
         Embedder["Embedding Engine"]
@@ -135,12 +135,12 @@ sequenceDiagram
 
 **Key design decisions:**
 
-- **Trivial filter** ([extractors/trivial_filter.py](engram/extractors/trivial_filter.py)): short text + no entity markers + common non-factual patterns = skip entirely, zero LLM cost
+- **Trivial filter** ([extractors/trivial_filter.py](engram_memory/extractors/trivial_filter.py)): short text + no entity markers + common non-factual patterns = skip entirely, zero LLM cost
 - **Neighbourhood-aware extraction**: send only top-5 vector matches + 1-hop neighbours as context (~200-500 tokens), not the full graph. One LLM call does extraction + placement + relationship decisions.
-- **Dynamic Cypher**: [graph/engine.py](engram/graph/engine.py) generates parameterised MERGE/SET from any label, any merge keys, any properties. Labels sanitised via regex before interpolation.
+- **Dynamic Cypher**: [graph/engine.py](engram_memory/graph/engine.py) generates parameterised MERGE/SET from any label, any merge keys, any properties. Labels sanitised via regex before interpolation.
 - **reference_id**: stored as `referenceId` property on every node created from this ingest. Optional.
 
-### LLM Output Contract ([models.py](engram/models.py))
+### LLM Output Contract ([models.py](engram_memory/models.py))
 
 ```python
 class NodeInstruction(BaseModel):
@@ -166,7 +166,7 @@ class IngestResult(BaseModel):
 ### Security
 
 - **userId**: function argument, never from LLM output. Every Cypher includes `WHERE n.userId = $uid`.
-- **Label/rel sanitisation**: `re.sub(r'[^A-Za-z0-9_]', '', label)` in [graph/sanitise.py](engram/graph/sanitise.py)
+- **Label/rel sanitisation**: `re.sub(r'[^A-Za-z0-9_]', '', label)` in [graph/sanitise.py](engram_memory/graph/sanitise.py)
 - **Properties**: all parameterised, never interpolated
 - **Pydantic validation**: rejects invalid LLM JSON before it touches Neo4j
 
@@ -197,11 +197,11 @@ sequenceDiagram
 
 
 
-### Decay-Weighted Traversal ([graph/traversal.py](engram/graph/traversal.py))
+### Decay-Weighted Traversal ([graph/traversal.py](engram_memory/graph/traversal.py))
 
 BFS from seeds. Each hop multiplies score by `decay` (default 0.5). Stops expanding when `score < min_score` (default 0.1). `max_depth` is a safety cap (default 5). Adaptive: dense relevant clusters go deep, sparse areas stop early.
 
-### Composite Scoring ([graph/scorer.py](engram/graph/scorer.py))
+### Composite Scoring ([graph/scorer.py](engram_memory/graph/scorer.py))
 
 ```
 final_score = alpha * vector_similarity + beta * (decay ^ hops) + gamma * node_strength
@@ -217,7 +217,7 @@ Default: alpha=0.5, beta=0.35, gamma=0.15
 ## Package Structure
 
 ```
-engram/                        # sibling to uktalentvisa/
+engram_memory/                        # sibling to uktalentvisa/
     __init__.py                     # exports: MemoryClient, Config
     config.py                       # env-based Config dataclass
     client.py                       # MemoryClient -- single entry point
@@ -264,7 +264,7 @@ engram/                        # sibling to uktalentvisa/
 ## Public API
 
 ```python
-from engram import MemoryClient, Config
+from engram_memory import MemoryClient, Config
 
 client = MemoryClient()   # auto-config from env
 # or: MemoryClient(config=Config(neo4j_uri=..., llm_provider="anthropic", ...))

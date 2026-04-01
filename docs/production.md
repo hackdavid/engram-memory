@@ -12,16 +12,16 @@ Interpret flags on `HealthStatus` (Neo4j connectivity, embedder loaded, vector i
 
 ## Smoke test CLI
 
-Configure `.env` / `engram/.env`, then install from the repo (`pip install -e .`) or PyPI when available.
+Configure `.env` / `engram_memory/.env`, then install from the repo (`pip install -e .`) or PyPI when available.
 
 | Use case | Command |
 |----------|---------|
-| Recommended | `python -m engram.cli.e2e_validate` |
-| Windows clone helper | `scripts\engram-e2e.cmd` |
-| Pip script (if on `PATH`) | `engram-e2e` |
+| Recommended | `python -m engram_memory.cli.e2e_validate` |
+| Windows clone helper | `scripts\engram_memory-e2e.cmd` |
+| Pip script (if on `PATH`) | `engram_memory-e2e` |
 | No package install | `python scripts/e2e_validate.py` |
 
-On Windows, prefer `python -m …` if `engram-e2e` is not found (Scripts not on `PATH`).
+On Windows, prefer `python -m …` if `engram_memory-e2e` is not found (Scripts not on `PATH`).
 
 | Flag / env | Purpose |
 |------------|---------|

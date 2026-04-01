@@ -3,8 +3,8 @@
 import pytest
 import asyncio
 
-from engram.exceptions import RateLimitExceededError
-from engram.rate_limiter import RateLimiter
+from engram_memory.exceptions import RateLimitExceededError
+from engram_memory.rate_limiter import RateLimiter
 
 
 @pytest.mark.asyncio

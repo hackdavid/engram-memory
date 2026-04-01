@@ -35,7 +35,7 @@ Most agent memory is a **flat pile of chunks** or a **single vector index**. Tha
 | “Ask the LLM” for every recall | Cost + latency | **`recall()` = embeddings + vector index + BFS + composite score** |
 | Rigid schema | Doesn’t fit every domain | **Schema emerges at runtime** from structured JSON extraction |
 
-Engram is built for **multi-step agents, copilots, and long-running workflows**: isolated `user_id` namespaces, hooks for audit/telemetry, health checks, and a CLI smoke test (`engram-e2e`) you can run in CI against a real database.
+Engram is built for **multi-step agents, copilots, and long-running workflows**: isolated `user_id` namespaces, hooks for audit/telemetry, health checks, and a CLI smoke test (`engram_memory-e2e`) you can run in CI against a real database.
 
 ## Documentation
 
@@ -47,7 +47,7 @@ Developer-focused guides live under [`docs/`](docs/):
 | [Getting started](docs/getting-started.md) | Install, LiteLLM check, first `ingest` / `recall` |
 | [Configuration](docs/configuration.md) | Environment variables, `Config`, `user_id` pattern |
 | [API overview](docs/api-overview.md) | Clients, models, exceptions |
-| [Production & operations](docs/production.md) | Health, `engram-e2e`, logging |
+| [Production & operations](docs/production.md) | Health, `engram_memory-e2e`, logging |
 
 On **PyPI**, the package metadata includes a **Documentation** URL that points to the same [`docs/` tree on GitHub](https://github.com/hackdavid/Engram/tree/main/docs).
 
@@ -83,7 +83,7 @@ asyncio.run(main())
 
 Use the **exact** model id (and `api_base` / `api_version` if required) in your **`LLM_*`** environment variables — see [Quick start](#quick-start).
 
-**Integration status:** the supported path is **`LiteLLMAdapter`** (`engram/llm/litellm_adapter.py`). Legacy adapters under `engram/llm/` may exist for reference; **new provider-specific integrations should prefer LiteLLM** or land as clean PRs — we are **open to contributions** (see below).
+**Integration status:** the supported path is **`LiteLLMAdapter`** (`engram_memory/llm/litellm_adapter.py`). Legacy adapters under `engram_memory/llm/` may exist for reference; **new provider-specific integrations should prefer LiteLLM** or land as clean PRs — we are **open to contributions** (see below).
 
 ---
 
@@ -115,27 +115,27 @@ pip install -e .
 When Engram is on PyPI, a normal install will be:
 
 ```bash
-pip install engram
+pip install engram_memory
 ```
 
 (PyPI treats the name as case-insensitive, so `pip install Engram` will be equivalent.)
 
-Either path installs the **runtime stack**: Neo4j driver, Pydantic, LiteLLM, and **local embeddings** (SentenceTransformers + PyTorch) for `EMBEDDING_PROVIDER=local` (the default). If you use **`EMBEDDING_PROVIDER=openai`**, add the OpenAI SDK: `pip install engram[openai-embed]` (after PyPI) or `pip install -e ".[openai-embed]"` from a clone.
+Either path installs the **runtime stack**: Neo4j driver, Pydantic, LiteLLM, and **local embeddings** (SentenceTransformers + PyTorch) for `EMBEDDING_PROVIDER=local` (the default). If you use **`EMBEDDING_PROVIDER=openai`**, add the OpenAI SDK: `pip install engram_memory[openai-embed]` (after PyPI) or `pip install -e ".[openai-embed]"` from a clone.
 
 ## End-to-end validation (production smoke)
 
-Run from a directory that has `.env` or `engram/.env` configured (see [`.env.example`](.env.example)). Install first with `pip install -e .` from a clone, or from PyPI when it is available.
+Run from a directory that has `.env` or `engram_memory/.env` configured (see [`.env.example`](.env.example)). Install first with `pip install -e .` from a clone, or from PyPI when it is available.
 
 ### How to run
 
 | Use case | Command |
 |----------|---------|
-| **Default (recommended)** | `python -m engram.cli.e2e_validate` |
-| Same, from a Windows clone | `scripts\engram-e2e.cmd` (repo root) |
-| Pip console script (if on `PATH`) | `engram-e2e` |
+| **Default (recommended)** | `python -m engram_memory.cli.e2e_validate` |
+| Same, from a Windows clone | `scripts\engram_memory-e2e.cmd` (repo root) |
+| Pip console script (if on `PATH`) | `engram_memory-e2e` |
 | Clone, package not installed | `python scripts/e2e_validate.py` |
 
-On **Windows**, `engram-e2e` often fails with “not recognized” because Python’s **Scripts** folder is not on `PATH`. Prefer the **`python -m …`** row above, or add that `Scripts` directory to `PATH` (conda env, `%LocalAppData%\Programs\Python\Python3xx\Scripts`, etc.).
+On **Windows**, `engram_memory-e2e` often fails with “not recognized” because Python’s **Scripts** folder is not on `PATH`. Prefer the **`python -m …`** row above, or add that `Scripts` directory to `PATH` (conda env, `%LocalAppData%\Programs\Python\Python3xx\Scripts`, etc.).
 
 ### What the default run does
 
@@ -147,11 +147,11 @@ On **Windows**, `engram-e2e` often fails with “not recognized” because Pytho
 
 | Goal | How |
 |------|-----|
-| Retrieval only (no writes) | `python -m engram.cli.e2e_validate --skip-seed --user-id <id>` or set `E2E_USER_ID` |
+| Retrieval only (no writes) | `python -m engram_memory.cli.e2e_validate --skip-seed --user-id <id>` or set `E2E_USER_ID` |
 | One LLM call for all seed text | `--batch-seed` |
 | Tune wall-clock limits | `E2E_LLM_TIMEOUT_SEC` (default `120`), `E2E_INGEST_TIMEOUT_SEC` (default LLM timeout + 45s) |
 
-More options: `python -m engram.cli.e2e_validate --help`.
+More options: `python -m engram_memory.cli.e2e_validate --help`.
 
 ### Neo4j-only check
 
@@ -195,7 +195,7 @@ export LOG_FORMAT="json"                  # or "text"
 
 ```python
 import asyncio
-from engram import AsyncMemoryClient, Config
+from engram_memory import AsyncMemoryClient, Config
 
 async def main():
     config = Config()  # reads from environment variables
@@ -226,7 +226,7 @@ asyncio.run(main())
 ### 3. Sync Usage
 
 ```python
-from engram import MemoryClient, Config
+from engram_memory import MemoryClient, Config
 
 client = MemoryClient(Config())
 result = client.ingest(user_id="user-123", text="I love hiking in the mountains.")
@@ -400,7 +400,7 @@ Before calling the LLM, Engram checks if the text is worth extracting. Short gre
 
 ```python
 # Add custom trivial patterns
-from engram.extractors.trivial_filter import is_trivial
+from engram_memory.extractors.trivial_filter import is_trivial
 is_trivial("skip this", custom_trivial_patterns=[r"skip this"])  # True
 ```
 
@@ -425,8 +425,8 @@ Every node carries a `_version` counter. When updating a node, you can pass `exp
 Extend Engram's lifecycle with custom hooks:
 
 ```python
-from engram.hooks.base import Hook
-from engram.models import IngestResult, RecallResult
+from engram_memory.hooks.base import Hook
+from engram_memory.models import IngestResult, RecallResult
 
 class AuditHook:
     """Log all ingest/recall events to an audit service."""
@@ -590,7 +590,7 @@ All fields can be set via environment variables (case-insensitive):
 ## Architecture
 
 ```
-engram/
+engram_memory/
 ├── __init__.py               # Public exports + lazy imports
 ├── _version.py               # "0.1.0"
 ├── client.py                 # AsyncMemoryClient + MemoryClient (sync wrapper)
@@ -647,7 +647,7 @@ Engram is **open source**. We want you to **use it in production**, **report rou
 
 - **Issues** — bugs, design questions, or provider-specific LiteLLM quirks (include model id, env vars you set, and redacted logs).
 - **Pull requests** — keep changes focused; add or extend **tests**; clone the repo and use `pip install -e ".[dev]"` for pytest/ruff, then `pytest tests/ -v`. Match existing style and typing.
-- **New LLM backends** — the supported integration is **`LiteLLMAdapter`**. If you need a path LiteLLM does not cover, open an issue first; we welcome clean adapters that follow `engram/llm/base.py` and include tests with mocks.
+- **New LLM backends** — the supported integration is **`LiteLLMAdapter`**. If you need a path LiteLLM does not cover, open an issue first; we welcome clean adapters that follow `engram_memory/llm/base.py` and include tests with mocks.
 
 Thank you for helping make agent memory **structured, fast, and boringly reliable**.
 

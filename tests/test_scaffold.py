@@ -2,13 +2,13 @@
 
 
 def test_package_is_importable():
-    import engram
+    import engram_memory
 
-    assert hasattr(engram, "__version__")
+    assert hasattr(engram_memory, "__version__")
 
 
 def test_version_is_string():
-    from engram import __version__
+    from engram_memory import __version__
 
     assert isinstance(__version__, str)
     parts = __version__.split(".")
@@ -16,6 +16,6 @@ def test_version_is_string():
 
 
 def test_config_export():
-    from engram import Config
+    from engram_memory import Config
 
     assert Config is not None

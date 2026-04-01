@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "engram"
+name = "engram_memory"
 dynamic = ["version"]
 description = "A standalone, async-first graph memory SDK for AI applications. Neo4j-backed, LLM-driven dynamic schema."
 readme = "README.md"
@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [project.scripts]
-engram-e2e = "engram.cli.e2e_validate:main"
+engram_memory-e2e = "engram_memory.cli.e2e_validate:main"
 
 [project.optional-dependencies]
 openai-embed = ["openai>=1.0"]
@@ -47,8 +47,8 @@ openai-embed = ["openai>=1.0"]
 local-embed = ["sentence-transformers>=2.0", "torch"]
 observability = ["opentelemetry-api>=1.0"]
 all = [
-    "engram[openai-embed]",
-    "engram[observability]",
+    "engram_memory[openai-embed]",
+    "engram_memory[observability]",
 ]
 dev = [
     "pytest>=8.0",
@@ -66,13 +66,13 @@ Repository = "https://github.com/hackdavid/Engram"
 Issues = "https://github.com/hackdavid/Engram/issues"
 
 [tool.hatch.version]
-path = "engram/_version.py"
+path = "engram_memory/_version.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 markers = [
-    "live: requires real Neo4j + LLM (set ENGRAM_LIVE_TESTS=1)",
+    "live: requires real Neo4j + LLM (set ENGRAM_MEMORY_LIVE_TESTS=1)",
 ]
 
 [tool.ruff]

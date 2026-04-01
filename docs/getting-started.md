@@ -16,9 +16,9 @@ cd Engram
 pip install -e .
 ```
 
-When the package is published: `pip install engram` (same as `pip install Engram` on PyPI).
+When the package is published: `pip install engram_memory` (same as `pip install Engram` on PyPI).
 
-The install includes **local embeddings** (SentenceTransformers + PyTorch) for the default `EMBEDDING_PROVIDER=local`. For **`EMBEDDING_PROVIDER=openai`**, also run `pip install -e ".[openai-embed]"` from the clone (or `pip install engram[openai-embed]` after PyPI).
+The install includes **local embeddings** (SentenceTransformers + PyTorch) for the default `EMBEDDING_PROVIDER=local`. For **`EMBEDDING_PROVIDER=openai`**, also run `pip install -e ".[openai-embed]"` from the clone (or `pip install engram_memory[openai-embed]` after PyPI).
 
 **Contributors** working from a git clone: `pip install -e ".[dev]"` (pytest, ruff, etc.).
 
@@ -35,7 +35,7 @@ If this fails, fix provider credentials or model id before setting `LLM_MODEL` a
 
 ## Minimal environment
 
-Create `.env` at the repo root or under `engram/.env` (see [.env.example](https://github.com/hackdavid/Engram/blob/main/.env.example) in the repository). Minimum:
+Create `.env` at the repo root or under `engram_memory/.env` (see [.env.example](https://github.com/hackdavid/Engram/blob/main/.env.example) in the repository). Minimum:
 
 ```bash
 export NEO4J_URI="bolt://localhost:7687"
@@ -58,7 +58,7 @@ export LLM_REQUEST_TIMEOUT="120"
 
 ```python
 import asyncio
-from engram import AsyncMemoryClient, Config
+from engram_memory import AsyncMemoryClient, Config
 
 async def main():
     config = Config()
@@ -89,7 +89,7 @@ Use **only** `user_id` values that match your configured pattern (default: alpha
 ## Sync wrapper
 
 ```python
-from engram import MemoryClient, Config
+from engram_memory import MemoryClient, Config
 
 with MemoryClient(Config()) as client:
     client.ingest(user_id="demo-user", text="Hello from sync API.")

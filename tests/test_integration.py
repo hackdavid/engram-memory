@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from engram.client import AsyncMemoryClient
-from engram.models import HealthStatus, IngestResult, RecallResult
+from engram_memory.client import AsyncMemoryClient
+from engram_memory.models import HealthStatus, IngestResult, RecallResult
 
 
 @pytest.fixture
@@ -72,7 +72,7 @@ async def test_full_lifecycle(mock_components):
     mc["engine"].build_upsert.return_value = ("MERGE ...", {"p": 1})
     mc["engine"].build_relationship.return_value = ("MATCH ...", {"r": 1})
 
-    with patch("engram.client.is_trivial", return_value=False):
+    with patch("engram_memory.client.is_trivial", return_value=False):
         ingest_result = await client.ingest(
             user_id="u1",
             text="Alice is an engineer at Google since 2020",
@@ -164,7 +164,7 @@ async def test_batch_ingest_lifecycle(mock_components):
     )
     mc["engine"].build_upsert.return_value = ("MERGE ...", {})
 
-    with patch("engram.client.is_trivial", side_effect=[True, False, True, False]):
+    with patch("engram_memory.client.is_trivial", side_effect=[True, False, True, False]):
         results = await client.ingest_batch(
             user_id="u1",
             items=[

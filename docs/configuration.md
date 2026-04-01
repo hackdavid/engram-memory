@@ -24,13 +24,13 @@ Engram loads settings from the **`Config`** object (`pydantic-settings`). You ca
 | `LLM_RATE_LIMIT_BURST` | `10` | |
 | `LLM_REQUEST_TIMEOUT` | — | Seconds; passed through to LiteLLM/HTTP client |
 
-The wired adapter is **`LiteLLMAdapter`** (`engram/llm/litellm_adapter.py`). Other files under `engram/llm/` are legacy references unless you contribute a new integration.
+The wired adapter is **`LiteLLMAdapter`** (`engram_memory/llm/litellm_adapter.py`). Other files under `engram_memory/llm/` are legacy references unless you contribute a new integration.
 
 ## Embeddings
 
 | Variable | Default | Notes |
 |----------|---------|--------|
-| `EMBEDDING_PROVIDER` | `local` | `local` (SentenceTransformers, bundled with `pip install engram`) or `openai` (add `pip install engram[openai-embed]`) |
+| `EMBEDDING_PROVIDER` | `local` | `local` (SentenceTransformers, bundled with `pip install engram_memory`) or `openai` (add `pip install engram_memory[openai-embed]`) |
 | `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Must match dimension below for existing indexes |
 | `EMBEDDING_DIMENSIONS` | `384` | Must match the vector index in Neo4j |
 | `EMBEDDING_API_KEY` | — | For `openai` provider |
@@ -94,7 +94,7 @@ Cache is invalidated on ingest for the affected `user_id`.
 ## Programmatic `Config`
 
 ```python
-from engram import Config
+from engram_memory import Config
 
 config = Config(
     neo4j_uri="bolt://localhost:7687",

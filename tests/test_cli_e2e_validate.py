@@ -1,8 +1,8 @@
-"""CLI argument validation for engram.cli.e2e_validate (no live services)."""
+"""CLI argument validation for engram_memory.cli.e2e_validate (no live services)."""
 
 import pytest
 
-from engram.cli.e2e_validate import main
+from engram_memory.cli.e2e_validate import main
 
 
 def test_skip_seed_requires_user_id():

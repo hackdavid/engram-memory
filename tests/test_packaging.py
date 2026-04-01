@@ -14,8 +14,8 @@ def test_package_installs_cleanly():
 
 
 def test_imports_after_install():
-    from engram import AsyncMemoryClient, Config, MemoryClient
-    from engram.models import (
+    from engram_memory import AsyncMemoryClient, Config, MemoryClient
+    from engram_memory.models import (
         GraphSnapshot,
         HealthStatus,
         IngestResult,
@@ -24,7 +24,7 @@ def test_imports_after_install():
         RelInstruction,
         ScoredNode,
     )
-    from engram.exceptions import (
+    from engram_memory.exceptions import (
         CircuitOpenError,
         ConcurrentModificationError,
         ConfigurationError,
@@ -36,13 +36,13 @@ def test_imports_after_install():
         MigrationError,
         RateLimitExceededError,
     )
-    from engram.constants import SDK_SCHEMA_VERSION
+    from engram_memory.constants import SDK_SCHEMA_VERSION
 
     assert SDK_SCHEMA_VERSION >= 1
 
 
 def test_version_string():
-    from engram import __version__
+    from engram_memory import __version__
 
     assert isinstance(__version__, str)
     parts = __version__.split(".")
@@ -50,33 +50,33 @@ def test_version_string():
 
 
 def test_subpackage_imports():
-    from engram.graph.driver import GraphDriver
-    from engram.graph.engine import CypherEngine
-    from engram.graph.indexes import IndexManager
-    from engram.graph.migrations import MigrationRunner
-    from engram.graph.traversal import TraversalEngine
-    from engram.graph.scorer import CompositeScorer
-    from engram.graph.hierarchy import HierarchyManager
-    from engram.graph.sanitise import sanitise_label, sanitise_rel_type, validate_user_id
-    from engram.embeddings.base import BaseEmbedding
-    from engram.embeddings.two_tier import TwoTierEmbedder
-    from engram.llm.base import BaseLLM
-    from engram.extractors.llm_extractor import LLMExtractor
-    from engram.extractors.trivial_filter import is_trivial
-    from engram.cache.lru_cache import MemoryCache
-    from engram.hooks.base import Hook
-    from engram.hooks.logger_hook import LoggerHook
-    from engram.health.checks import HealthChecker
-    from engram.background.runner import BackgroundRunner
-    from engram.background.decay_task import DecayTask
-    from engram.rate_limiter import RateLimiter
-    from engram.observability.logging import setup_logging
-    from engram.observability.metrics import metrics, MetricsRegistry
-    from engram.observability.tracing import traced
+    from engram_memory.graph.driver import GraphDriver
+    from engram_memory.graph.engine import CypherEngine
+    from engram_memory.graph.indexes import IndexManager
+    from engram_memory.graph.migrations import MigrationRunner
+    from engram_memory.graph.traversal import TraversalEngine
+    from engram_memory.graph.scorer import CompositeScorer
+    from engram_memory.graph.hierarchy import HierarchyManager
+    from engram_memory.graph.sanitise import sanitise_label, sanitise_rel_type, validate_user_id
+    from engram_memory.embeddings.base import BaseEmbedding
+    from engram_memory.embeddings.two_tier import TwoTierEmbedder
+    from engram_memory.llm.base import BaseLLM
+    from engram_memory.extractors.llm_extractor import LLMExtractor
+    from engram_memory.extractors.trivial_filter import is_trivial
+    from engram_memory.cache.lru_cache import MemoryCache
+    from engram_memory.hooks.base import Hook
+    from engram_memory.hooks.logger_hook import LoggerHook
+    from engram_memory.health.checks import HealthChecker
+    from engram_memory.background.runner import BackgroundRunner
+    from engram_memory.background.decay_task import DecayTask
+    from engram_memory.rate_limiter import RateLimiter
+    from engram_memory.observability.logging import setup_logging
+    from engram_memory.observability.metrics import metrics, MetricsRegistry
+    from engram_memory.observability.tracing import traced
 
 
 def test_py_typed_marker_exists():
     import importlib.resources
-    import engram
+    import engram_memory
 
-    assert (importlib.resources.files(engram) / "py.typed").is_file()
+    assert (importlib.resources.files(engram_memory) / "py.typed").is_file()

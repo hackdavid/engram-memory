@@ -3,15 +3,15 @@
 import json
 import logging
 
-from engram.observability.logging import JSONFormatter, setup_logging
-from engram.observability.metrics import Counter, Histogram, MetricsRegistry, metrics
-from engram.observability.tracing import traced
+from engram_memory.observability.logging import JSONFormatter, setup_logging
+from engram_memory.observability.metrics import Counter, Histogram, MetricsRegistry, metrics
+from engram_memory.observability.tracing import traced
 
 
 def test_json_formatter_produces_valid_json():
     fmt = JSONFormatter()
     record = logging.LogRecord(
-        name="engram.test", level=logging.INFO, pathname="",
+        name="engram_memory.test", level=logging.INFO, pathname="",
         lineno=0, msg="hello %s", args=("world",), exc_info=None,
     )
     output = fmt.format(record)
@@ -22,7 +22,7 @@ def test_json_formatter_produces_valid_json():
 
 def test_setup_logging_idempotent():
     setup_logging(level="DEBUG", json_format=True)
-    root = logging.getLogger("engram")
+    root = logging.getLogger("engram_memory")
     handler_count = len(root.handlers)
     setup_logging(level="DEBUG", json_format=True)
     assert len(root.handlers) == handler_count

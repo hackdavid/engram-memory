@@ -1,6 +1,6 @@
 """Live end-to-end tests against real Neo4j and LLM.
 
-Requires ENGRAM_LIVE_TESTS=1 (in env or `.env` / `engram/.env`) and valid
+Requires ENGRAM_MEMORY_LIVE_TESTS=1 (in env or `.env` / `engram_memory/.env`) and valid
 NEO4J_* / LLM_* (and embedding) vars. conftest loads dotenv when this file is
 run or `-m live` is used. Mutates the database; teardown deletes by userId.
 
@@ -16,10 +16,10 @@ import uuid
 import pytest
 import pytest_asyncio
 
-from engram.client import AsyncMemoryClient
-from engram.config import Config
+from engram_memory.client import AsyncMemoryClient
+from engram_memory.config import Config
 
-LIVE_ENABLED = os.environ.get("ENGRAM_LIVE_TESTS", "").strip().lower() in (
+LIVE_ENABLED = os.environ.get("ENGRAM_MEMORY_LIVE_TESTS", "").strip().lower() in (
     "1",
     "true",
     "yes",
@@ -30,7 +30,7 @@ pytestmark = [
     pytest.mark.live,
     pytest.mark.skipif(
         not LIVE_ENABLED,
-        reason="Set ENGRAM_LIVE_TESTS=1 to run live Neo4j/LLM tests",
+        reason="Set ENGRAM_MEMORY_LIVE_TESTS=1 to run live Neo4j/LLM tests",
     ),
 ]
 
@@ -55,7 +55,7 @@ def live_config() -> Config:
 
 @pytest.fixture
 def live_user_id() -> str:
-    return f"engram-live-{uuid.uuid4().hex[:16]}"
+    return f"engram_memory-live-{uuid.uuid4().hex[:16]}"
 
 
 @pytest_asyncio.fixture
@@ -172,7 +172,7 @@ async def test_live_cross_user_recall_does_not_leak_other_user_memory(
     """Off-user query: another user_id must not see the first user's secret token."""
     token = f"ZZXISO_{uuid.uuid4().hex[:12]}"
     user_a = live_user_id
-    user_b = f"engram-live-b-{uuid.uuid4().hex[:16]}"
+    user_b = f"engram_memory-live-b-{uuid.uuid4().hex[:16]}"
     try:
         await live_client.ingest(
             user_id=user_a,
@@ -210,8 +210,8 @@ async def test_live_discriminative_recall_parking_vs_cafeteria(
     live_client: AsyncMemoryClient, live_user_id: str
 ) -> None:
     """Two ingests with distinct reference_id: recall should surface the matching ingest."""
-    ref_park = f"engram-live-park-{uuid.uuid4().hex[:8]}"
-    ref_cafe = f"engram-live-cafe-{uuid.uuid4().hex[:8]}"
+    ref_park = f"engram_memory-live-park-{uuid.uuid4().hex[:8]}"
+    ref_cafe = f"engram_memory-live-cafe-{uuid.uuid4().hex[:8]}"
     await live_client.ingest(
         user_id=live_user_id,
         text=(
