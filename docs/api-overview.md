@@ -76,7 +76,7 @@ Import from `engram_memory.exceptions` when you need to catch specific failures.
 
 ## Hooks
 
-The `Hook` protocol and `LoggerHook` live under `engram.hooks`. Use them to wrap or instrument `ingest` / `recall` in your application layer (audit, redaction, metrics). See **Plugin Hooks** in the [main README](https://github.com/hackdavid/Engram/blob/main/README.md#plugin-hooks).
+The `Hook` protocol and `LoggerHook` live under `engram.hooks`. Use them to wrap or instrument `ingest` / `recall` in your application layer (audit, redaction, metrics). See **Plugin Hooks** in the [main README](https://github.com/hackdavid/engram-memory/blob/main/README.md#plugin-hooks).
 
 ## Pipelines (conceptual)
 
@@ -99,4 +99,4 @@ The `Hook` protocol and `LoggerHook` live under `engram.hooks`. Use them to wrap
 5. Composite scoring and ranking
 6. Cache result, return `RecallResult`
 
-Detailed ASCII diagrams live in the [main README](https://github.com/hackdavid/Engram/blob/main/README.md#how-it-works) under **How It Works**.
+Detailed ASCII diagrams live in the [main README](https://github.com/hackdavid/engram-memory/blob/main/README.md#how-it-works) under **How It Works**.

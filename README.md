@@ -10,13 +10,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![LiteLLM](https://img.shields.io/badge/LLM-LiteLLM-111111?style=flat)](https://github.com/BerriAI/litellm)
 [![Neo4j](https://img.shields.io/badge/graph-Neo4j-008CC1?style=flat&logo=neo4j&logoColor=white)](https://neo4j.com/)
-[![Docs](https://img.shields.io/badge/docs-GitHub-24292f?style=flat&logo=github)](https://github.com/hackdavid/Engram/tree/main/docs)
+[![Docs](https://img.shields.io/badge/docs-GitHub-24292f?style=flat&logo=github)](https://github.com/hackdavid/engram-memory/tree/main/docs)
 
 **Ingest once with the LLM → recall with graph + vectors + scoring — no LLM on the read path.**
 
 🧠 **Structured** · ⚡ **Async-first** · 🔌 **100+ models via [LiteLLM](https://docs.litellm.ai/)** · 🛡️ **Decay, cache, rate limits** · 🚀 **Production-minded**
 
-📖 **[Developer docs](https://github.com/hackdavid/Engram/tree/main/docs)** · **[GitHub](https://github.com/hackdavid/Engram)** · **[Issues](https://github.com/hackdavid/Engram/issues)**
+📖 **[Developer docs](https://github.com/hackdavid/engram-memory/tree/main/docs)** · **[GitHub](https://github.com/hackdavid/engram-memory)** · **[Issues](https://github.com/hackdavid/engram-memory/issues)**
 
 [Why Engram](#why-engram-next-generation-memory) · [Docs](#documentation) · [Verify LiteLLM](#verify-your-model-with-litellm-first) · [Install](#installation) · [Quick start](#quick-start) · [Contributing](#contributing) · [License](#license)
 
@@ -49,7 +49,7 @@ Developer-focused guides live under [`docs/`](docs/):
 | [API overview](docs/api-overview.md) | Clients, models, exceptions |
 | [Production & operations](docs/production.md) | Health, `engram_memory-e2e`, logging |
 
-On **PyPI**, the package metadata includes a **Documentation** URL that points to the same [`docs/` tree on GitHub](https://github.com/hackdavid/Engram/tree/main/docs).
+On **PyPI**, the package metadata includes a **Documentation** URL that points to the same [`docs/` tree on GitHub](https://github.com/hackdavid/engram-memory/tree/main/docs).
 
 ---
 
@@ -112,8 +112,8 @@ Use the **exact** model id (and `api_base` / `api_version` if required) in your 
 **PyPI release is in progress.** Until the package is published, install from this repository:
 
 ```bash
-git clone https://github.com/hackdavid/Engram.git
-cd Engram
+git clone https://github.com/hackdavid/engram-memory.git
+cd engram-memory
 pip install -e .
 ```
 

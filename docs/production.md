@@ -64,5 +64,5 @@ Local SentenceTransformers models download on first use. Plan container images o
 
 ## Where to get help
 
-- **Issues:** [github.com/hackdavid/Engram/issues](https://github.com/hackdavid/Engram/issues)
-- **Contributing:** [README — Contributing](https://github.com/hackdavid/Engram/blob/main/README.md#-contributing)
+- **Issues:** [github.com/hackdavid/engram-memory/issues](https://github.com/hackdavid/engram-memory/issues)
+- **Contributing:** [README — Contributing](https://github.com/hackdavid/engram-memory/blob/main/README.md#-contributing)

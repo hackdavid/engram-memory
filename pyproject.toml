@@ -60,10 +60,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/hackdavid/Engram"
-Documentation = "https://github.com/hackdavid/Engram/tree/main/docs"
-Repository = "https://github.com/hackdavid/Engram"
-Issues = "https://github.com/hackdavid/Engram/issues"
+Homepage = "https://github.com/hackdavid/engram-memory"
+Documentation = "https://github.com/hackdavid/engram-memory/tree/main/docs"
+Repository = "https://github.com/hackdavid/engram-memory"
+Issues = "https://github.com/hackdavid/engram-memory/issues"
 
 [tool.hatch.version]
 path = "engram_memory/_version.py"
