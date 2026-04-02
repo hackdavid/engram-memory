@@ -16,9 +16,9 @@ cd engram-memory
 pip install -e .
 ```
 
-When the package is published: `pip install engram_memory` (same as `pip install Engram` on PyPI).
+When the package is published: `pip install engram-memory-sdk`.
 
-The install includes **local embeddings** (SentenceTransformers + PyTorch) for the default `EMBEDDING_PROVIDER=local`. For **`EMBEDDING_PROVIDER=openai`**, also run `pip install -e ".[openai-embed]"` from the clone (or `pip install engram_memory[openai-embed]` after PyPI).
+The install includes **local embeddings** (SentenceTransformers + PyTorch) for the default `EMBEDDING_PROVIDER=local`. For **`EMBEDDING_PROVIDER=openai`**, also run `pip install -e ".[openai-embed]"` from the clone (or `pip install engram-memory-sdk[openai-embed]` after PyPI).
 
 **Contributors** working from a git clone: `pip install -e ".[dev]"` (pytest, ruff, etc.).
 

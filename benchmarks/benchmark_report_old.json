@@ -1,7 +1,7 @@
 {
   "meta": {
     "suite": "engram_memory live benchmark",
-    "timestamp_utc": "2026-04-02T08:24:53.930554+00:00",
+    "timestamp_utc": "2026-04-01T15:01:16.505636+00:00",
     "python_version": "3.12.4",
     "platform": "Windows-11-10.0.22631-SP0",
     "sdk_version": "0.1.0"
@@ -11,187 +11,187 @@
     "llm_reachable": true,
     "embedding_model_loaded": true,
     "vector_index_exists": true,
-    "latency_ms": 1995.14
+    "latency_ms": 1693.21
   },
   "ingest": {
     "corpus_size": 12,
     "latency": {
       "count": 12,
-      "mean_ms": 5208.62,
-      "median_ms": 4685.37,
-      "p50_ms": 4685.37,
-      "p95_ms": 7796.59,
-      "p99_ms": 8136.54,
-      "max_ms": 8221.52,
-      "min_ms": 3408.87,
-      "stddev_ms": 1626.55,
-      "total_sec": 62.503
+      "mean_ms": 6210.13,
+      "median_ms": 6339.75,
+      "p50_ms": 6339.75,
+      "p95_ms": 8720.69,
+      "p99_ms": 9659.15,
+      "max_ms": 9893.77,
+      "min_ms": 3298.04,
+      "stddev_ms": 1808.24,
+      "total_sec": 74.522
     },
-    "throughput_ops_per_sec": 0.19,
-    "nodes_created_total": 33,
+    "throughput_ops_per_sec": 0.16,
+    "nodes_created_total": 31,
     "nodes_updated_total": 1,
-    "relationships_created_total": 22,
-    "avg_nodes_per_ingest": 2.83,
-    "total_tokens_prompt": 5420,
-    "total_tokens_completion": 4652,
-    "total_tokens_all": 10072,
-    "avg_tokens_per_ingest": 839.3,
+    "relationships_created_total": 20,
+    "avg_nodes_per_ingest": 2.67,
+    "total_tokens_prompt": 5338,
+    "total_tokens_completion": 4344,
+    "total_tokens_all": 9682,
+    "avg_tokens_per_ingest": 806.8,
     "per_document": [
       {
         "index": 0,
         "domain": "engineering",
-        "reference_id": "eng-bench-2c1a8649e04b-0",
+        "reference_id": "eng-bench-23677d7c670e-0",
         "skipped": false,
-        "nodes_created": 3,
+        "nodes_created": 2,
         "nodes_updated": 0,
-        "relationships_created": 3,
-        "latency_ms": 5588.52,
+        "relationships_created": 2,
+        "latency_ms": 6579.01,
         "tokens_prompt": 428,
-        "tokens_completion": 415,
-        "tokens_total": 843
+        "tokens_completion": 325,
+        "tokens_total": 753
       },
       {
         "index": 1,
         "domain": "engineering",
-        "reference_id": "eng-bench-2c1a8649e04b-1",
+        "reference_id": "eng-bench-23677d7c670e-1",
         "skipped": false,
-        "nodes_created": 4,
+        "nodes_created": 2,
         "nodes_updated": 0,
-        "relationships_created": 3,
-        "latency_ms": 6982.44,
+        "relationships_created": 1,
+        "latency_ms": 4093.63,
         "tokens_prompt": 416,
-        "tokens_completion": 508,
-        "tokens_total": 924
+        "tokens_completion": 251,
+        "tokens_total": 667
       },
       {
         "index": 2,
         "domain": "engineering",
-        "reference_id": "eng-bench-2c1a8649e04b-2",
+        "reference_id": "eng-bench-23677d7c670e-2",
         "skipped": false,
-        "nodes_created": 2,
+        "nodes_created": 3,
         "nodes_updated": 0,
-        "relationships_created": 1,
-        "latency_ms": 3415.36,
+        "relationships_created": 2,
+        "latency_ms": 5747.3,
         "tokens_prompt": 419,
-        "tokens_completion": 274,
-        "tokens_total": 693
+        "tokens_completion": 396,
+        "tokens_total": 815
       },
       {
         "index": 3,
         "domain": "healthcare",
-        "reference_id": "health-bench-2c1a8649e04b-3",
+        "reference_id": "health-bench-23677d7c670e-3",
         "skipped": false,
         "nodes_created": 3,
         "nodes_updated": 0,
         "relationships_created": 2,
-        "latency_ms": 4662.19,
-        "tokens_prompt": 548,
-        "tokens_completion": 431,
-        "tokens_total": 979
+        "latency_ms": 6052.29,
+        "tokens_prompt": 549,
+        "tokens_completion": 436,
+        "tokens_total": 985
       },
       {
         "index": 4,
         "domain": "healthcare",
-        "reference_id": "health-bench-2c1a8649e04b-4",
+        "reference_id": "health-bench-23677d7c670e-4",
         "skipped": false,
-        "nodes_created": 2,
+        "nodes_created": 3,
         "nodes_updated": 1,
-        "relationships_created": 1,
-        "latency_ms": 4510.23,
-        "tokens_prompt": 578,
-        "tokens_completion": 434,
-        "tokens_total": 1012
+        "relationships_created": 2,
+        "latency_ms": 7368.85,
+        "tokens_prompt": 561,
+        "tokens_completion": 617,
+        "tokens_total": 1178
       },
       {
         "index": 5,
         "domain": "finance",
-        "reference_id": "fin-bench-2c1a8649e04b-5",
+        "reference_id": "fin-bench-23677d7c670e-5",
         "skipped": false,
-        "nodes_created": 3,
+        "nodes_created": 4,
         "nodes_updated": 0,
-        "relationships_created": 2,
-        "latency_ms": 8221.52,
-        "tokens_prompt": 491,
-        "tokens_completion": 444,
-        "tokens_total": 935
+        "relationships_created": 3,
+        "latency_ms": 7760.89,
+        "tokens_prompt": 425,
+        "tokens_completion": 478,
+        "tokens_total": 903
       },
       {
         "index": 6,
         "domain": "finance",
-        "reference_id": "fin-bench-2c1a8649e04b-6",
+        "reference_id": "fin-bench-23677d7c670e-6",
         "skipped": false,
         "nodes_created": 2,
         "nodes_updated": 0,
         "relationships_created": 1,
-        "latency_ms": 4066.24,
+        "latency_ms": 3298.04,
         "tokens_prompt": 418,
-        "tokens_completion": 275,
-        "tokens_total": 693
+        "tokens_completion": 241,
+        "tokens_total": 659
       },
       {
         "index": 7,
         "domain": "education",
-        "reference_id": "edu-bench-2c1a8649e04b-7",
+        "reference_id": "edu-bench-23677d7c670e-7",
         "skipped": false,
-        "nodes_created": 4,
+        "nodes_created": 2,
         "nodes_updated": 0,
-        "relationships_created": 3,
-        "latency_ms": 7448.91,
+        "relationships_created": 1,
+        "latency_ms": 4068.25,
         "tokens_prompt": 435,
-        "tokens_completion": 551,
-        "tokens_total": 986
+        "tokens_completion": 315,
+        "tokens_total": 750
       },
       {
         "index": 8,
         "domain": "operations",
-        "reference_id": "ops-bench-2c1a8649e04b-8",
+        "reference_id": "ops-bench-23677d7c670e-8",
         "skipped": false,
         "nodes_created": 4,
         "nodes_updated": 0,
         "relationships_created": 3,
-        "latency_ms": 5860.97,
+        "latency_ms": 9893.77,
         "tokens_prompt": 422,
-        "tokens_completion": 454,
-        "tokens_total": 876
+        "tokens_completion": 447,
+        "tokens_total": 869
       },
       {
         "index": 9,
         "domain": "operations",
-        "reference_id": "ops-bench-2c1a8649e04b-9",
+        "reference_id": "ops-bench-23677d7c670e-9",
         "skipped": false,
         "nodes_created": 2,
         "nodes_updated": 0,
         "relationships_created": 1,
-        "latency_ms": 3408.87,
+        "latency_ms": 6114.52,
         "tokens_prompt": 419,
-        "tokens_completion": 247,
-        "tokens_total": 666
+        "tokens_completion": 279,
+        "tokens_total": 698
       },
       {
         "index": 10,
         "domain": "compliance",
-        "reference_id": "legal-bench-2c1a8649e04b-10",
+        "reference_id": "legal-bench-23677d7c670e-10",
         "skipped": false,
         "nodes_created": 2,
         "nodes_updated": 0,
         "relationships_created": 1,
-        "latency_ms": 3629.62,
+        "latency_ms": 6564.98,
         "tokens_prompt": 424,
-        "tokens_completion": 299,
-        "tokens_total": 723
+        "tokens_completion": 279,
+        "tokens_total": 703
       },
       {
         "index": 11,
         "domain": "compliance",
-        "reference_id": "legal-bench-2c1a8649e04b-11",
+        "reference_id": "legal-bench-23677d7c670e-11",
         "skipped": false,
         "nodes_created": 2,
         "nodes_updated": 0,
         "relationships_created": 1,
-        "latency_ms": 4708.55,
+        "latency_ms": 6980.08,
         "tokens_prompt": 422,
-        "tokens_completion": 320,
-        "tokens_total": 742
+        "tokens_completion": 280,
+        "tokens_total": 702
       }
     ]
   },
@@ -199,17 +199,17 @@
     "query_count": 12,
     "latency": {
       "count": 12,
-      "mean_ms": 108.63,
-      "median_ms": 93.75,
-      "p50_ms": 93.75,
-      "p95_ms": 190.39,
-      "p99_ms": 218.16,
-      "max_ms": 225.1,
-      "min_ms": 68.42,
-      "stddev_ms": 43.89,
-      "total_sec": 1.304
+      "mean_ms": 105.55,
+      "median_ms": 94.76,
+      "p50_ms": 94.76,
+      "p95_ms": 161.43,
+      "p99_ms": 179.32,
+      "max_ms": 183.79,
+      "min_ms": 76.9,
+      "stddev_ms": 30.09,
+      "total_sec": 1.267
     },
-    "throughput_ops_per_sec": 9.21,
+    "throughput_ops_per_sec": 9.47,
     "per_query": [
       {
         "index": 0,
@@ -224,12 +224,12 @@
           "CockroachDB": true
         },
         "hit_rate": 0.5,
-        "nodes_returned": 3,
-        "total_candidates": 3,
+        "nodes_returned": 2,
+        "total_candidates": 2,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.924,
-        "latency_ms": 225.1
+        "top_score": 0.9322,
+        "latency_ms": 183.79
       },
       {
         "index": 1,
@@ -244,12 +244,12 @@
           "kube-prod-us-east": true
         },
         "hit_rate": 1.0,
-        "nodes_returned": 5,
-        "total_candidates": 5,
+        "nodes_returned": 2,
+        "total_candidates": 2,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.935,
-        "latency_ms": 162.0
+        "top_score": 0.9046,
+        "latency_ms": 76.9
       },
       {
         "index": 2,
@@ -268,8 +268,8 @@
         "total_candidates": 5,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.9371,
-        "latency_ms": 82.65
+        "top_score": 0.9306,
+        "latency_ms": 143.13
       },
       {
         "index": 3,
@@ -285,11 +285,11 @@
         },
         "hit_rate": 1.0,
         "nodes_returned": 10,
-        "total_candidates": 13,
+        "total_candidates": 11,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.898,
-        "latency_ms": 94.33
+        "top_score": 0.9499,
+        "latency_ms": 117.29
       },
       {
         "index": 4,
@@ -304,12 +304,12 @@
           "Luis Mendez": true
         },
         "hit_rate": 1.0,
-        "nodes_returned": 10,
-        "total_candidates": 11,
+        "nodes_returned": 9,
+        "total_candidates": 9,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.8883,
-        "latency_ms": 112.47
+        "top_score": 0.915,
+        "latency_ms": 97.69
       },
       {
         "index": 5,
@@ -324,12 +324,12 @@
           "Mei-Lin Chang": true
         },
         "hit_rate": 1.0,
-        "nodes_returned": 9,
-        "total_candidates": 9,
+        "nodes_returned": 6,
+        "total_candidates": 6,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.9067,
-        "latency_ms": 104.23
+        "top_score": 0.942,
+        "latency_ms": 90.33
       },
       {
         "index": 6,
@@ -342,12 +342,12 @@
           "Raj Patel": true
         },
         "hit_rate": 1.0,
-        "nodes_returned": 7,
-        "total_candidates": 7,
+        "nodes_returned": 8,
+        "total_candidates": 8,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.9236,
-        "latency_ms": 79.75
+        "top_score": 0.9288,
+        "latency_ms": 90.72
       },
       {
         "index": 7,
@@ -362,12 +362,12 @@
           "CS-6140": true
         },
         "hit_rate": 1.0,
-        "nodes_returned": 7,
-        "total_candidates": 7,
+        "nodes_returned": 6,
+        "total_candidates": 6,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.9105,
-        "latency_ms": 82.23
+        "top_score": 0.9501,
+        "latency_ms": 87.45
       },
       {
         "index": 8,
@@ -386,8 +386,8 @@
         "total_candidates": 4,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.9395,
-        "latency_ms": 87.09
+        "top_score": 0.9495,
+        "latency_ms": 93.25
       },
       {
         "index": 9,
@@ -402,12 +402,12 @@
           "Marco Bianchi": false
         },
         "hit_rate": 0.5,
-        "nodes_returned": 3,
-        "total_candidates": 3,
+        "nodes_returned": 2,
+        "total_candidates": 2,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.892,
-        "latency_ms": 93.17
+        "top_score": 0.8894,
+        "latency_ms": 85.85
       },
       {
         "index": 10,
@@ -426,8 +426,8 @@
         "total_candidates": 4,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.839,
-        "latency_ms": 112.15
+        "top_score": 0.8916,
+        "latency_ms": 103.92
       },
       {
         "index": 11,
@@ -442,12 +442,12 @@
           "non-conformit": true
         },
         "hit_rate": 1.0,
-        "nodes_returned": 2,
-        "total_candidates": 2,
+        "nodes_returned": 6,
+        "total_candidates": 6,
         "from_cache": false,
         "reciprocal_rank": 1.0,
-        "top_score": 0.9087,
-        "latency_ms": 68.42
+        "top_score": 0.9124,
+        "latency_ms": 96.28
       }
     ]
   },
@@ -455,34 +455,34 @@
     "query_count": 6,
     "latency": {
       "count": 6,
-      "mean_ms": 79.68,
-      "median_ms": 67.45,
-      "p50_ms": 67.45,
-      "p95_ms": 120.88,
-      "p99_ms": 131.83,
-      "max_ms": 134.57,
-      "min_ms": 63.24,
-      "stddev_ms": 27.5,
-      "total_sec": 0.478
+      "mean_ms": 94.48,
+      "median_ms": 92.18,
+      "p50_ms": 92.18,
+      "p95_ms": 113.43,
+      "p99_ms": 117.5,
+      "max_ms": 118.52,
+      "min_ms": 79.48,
+      "stddev_ms": 13.36,
+      "total_sec": 0.567
     },
-    "throughput_ops_per_sec": 12.55
+    "throughput_ops_per_sec": 10.58
   },
   "accuracy": {
     "precision_at_k": {
       "1": 1.0,
-      "3": 0.5556,
+      "3": 0.5833,
       "5": 0.35,
       "10": 0.175
     },
     "recall_at_k": {
-      "1": 0.625,
-      "3": 0.875,
+      "1": 0.75,
+      "3": 0.9167,
       "5": 0.9167,
       "10": 0.9167
     },
     "f1_at_k": {
-      "1": 0.7692,
-      "3": 0.6796,
+      "1": 0.8571,
+      "3": 0.7129,
       "5": 0.5066,
       "10": 0.2939
     },
@@ -495,39 +495,39 @@
     "per_doc": [
       {
         "doc_index": 1,
-        "latency_ms": 2742.53
+        "latency_ms": 3766.42
       },
       {
         "doc_index": 2,
-        "latency_ms": 1998.6
+        "latency_ms": 2097.63
       },
       {
         "doc_index": 3,
-        "latency_ms": 3305.22
+        "latency_ms": 3184.08
       },
       {
         "doc_index": 4,
-        "latency_ms": 4177.55
+        "latency_ms": 3933.25
       },
       {
         "doc_index": 5,
-        "latency_ms": 3034.66
+        "latency_ms": 3565.36
       }
     ],
-    "slope_ms_per_doc": 276.32,
+    "slope_ms_per_doc": 143.35,
     "interpretation": "near-constant (O(1))"
   },
   "graph_stats": {
     "total_nodes": 58,
-    "total_relationships": 59,
+    "total_relationships": 55,
     "nodes_per_ingest": 4.83,
-    "rels_per_ingest": 4.92,
+    "rels_per_ingest": 4.58,
     "sample_labels": [
       "ClusterSummary"
     ]
   },
   "user_isolation": {
-    "secret_token": "SECRET_cd7c722434",
+    "secret_token": "SECRET_313d33519d",
     "leaked": false,
     "user_b_nodes_returned": 0,
     "verdict": "PASS \u2014 isolation holds"
@@ -554,9 +554,10 @@
           "education"
         ],
         "top3_domains_found": [
-          "finance"
+          "finance",
+          "education"
         ],
-        "contaminated": false
+        "contaminated": true
       },
       {
         "query": "What did the GDPR audit find?",
@@ -578,10 +579,9 @@
           "engineering"
         ],
         "top3_domains_found": [
-          "healthcare",
-          "engineering"
+          "healthcare"
         ],
-        "contaminated": true
+        "contaminated": false
       }
     ],
     "contamination_rate": 0.25,
@@ -591,30 +591,30 @@
     "headline": "Engram-Memory SDK -- Live Benchmark Results",
     "corpus_size": 12,
     "query_count": 12,
-    "ingest_p50_ms": 4685.37,
-    "ingest_p95_ms": 7796.59,
-    "ingest_throughput": 0.19,
-    "recall_p50_ms": 93.75,
-    "recall_p95_ms": 190.39,
-    "recall_throughput": 9.21,
-    "search_p50_ms": 67.45,
+    "ingest_p50_ms": 6339.75,
+    "ingest_p95_ms": 8720.69,
+    "ingest_throughput": 0.16,
+    "recall_p50_ms": 94.76,
+    "recall_p95_ms": 161.43,
+    "recall_throughput": 9.47,
+    "search_p50_ms": 92.18,
     "mrr": 1.0,
     "precision_at_1": 1.0,
-    "precision_at_3": 0.5556,
+    "precision_at_3": 0.5833,
     "precision_at_5": 0.35,
-    "recall_at_3": 0.875,
-    "f1_at_3": 0.6796,
+    "recall_at_3": 0.9167,
+    "f1_at_3": 0.7129,
     "discrimination_clean_rate": 0.75,
     "user_isolation": "PASS \u2014 isolation holds",
     "total_nodes": 58,
-    "total_relationships": 59,
-    "scaling_slope_ms": 276.32,
-    "tokens_total_ingest": 10072,
-    "tokens_avg_per_ingest": 839.3,
-    "tokens_prompt_total": 5420,
-    "tokens_completion_total": 4652,
-    "estimated_cost_usd": 0.88344,
-    "cost_per_ingest_usd": 0.07362,
-    "cost_per_1k_docs_usd": 73.62
+    "total_relationships": 55,
+    "scaling_slope_ms": 143.35,
+    "tokens_total_ingest": 9682,
+    "tokens_avg_per_ingest": 806.8,
+    "tokens_prompt_total": 5338,
+    "tokens_completion_total": 4344,
+    "estimated_cost_usd": 0.84156,
+    "cost_per_ingest_usd": 0.07013,
+    "cost_per_1k_docs_usd": 70.13
   }
 }

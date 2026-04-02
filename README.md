@@ -120,12 +120,10 @@ pip install -e .
 When Engram is on PyPI, a normal install will be:
 
 ```bash
-pip install engram_memory
+pip install engram-memory-sdk
 ```
 
-(PyPI treats the name as case-insensitive, so `pip install Engram` will be equivalent.)
-
-Either path installs the **runtime stack**: Neo4j driver, Pydantic, LiteLLM, and **local embeddings** (SentenceTransformers + PyTorch) for `EMBEDDING_PROVIDER=local` (the default). If you use **`EMBEDDING_PROVIDER=openai`**, add the OpenAI SDK: `pip install engram_memory[openai-embed]` (after PyPI) or `pip install -e ".[openai-embed]"` from a clone.
+Either path installs the **runtime stack**: Neo4j driver, Pydantic, LiteLLM, and **local embeddings** (SentenceTransformers + PyTorch) for `EMBEDDING_PROVIDER=local` (the default). If you use **`EMBEDDING_PROVIDER=openai`**, add the OpenAI SDK: `pip install engram-memory-sdk[openai-embed]` (after PyPI) or `pip install -e ".[openai-embed]"` from a clone.
 
 ## End-to-end validation (production smoke)
 

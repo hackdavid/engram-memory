@@ -34,7 +34,7 @@ class LocalEmbedding(BaseEmbedding):
     def __init__(self, model_name: str = "all-MiniLM-L6-v2") -> None:
         if sentence_transformers is None:
             raise ImportError(
-                "sentence-transformers is required: pip install engram_memory"
+                "sentence-transformers is required: pip install engram-memory-sdk"
             )
         _silence_transformers_load_noise()
         print(

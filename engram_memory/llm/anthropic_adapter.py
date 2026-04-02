@@ -27,7 +27,7 @@ class AnthropicLLM(BaseLLM):
             base_delay=0.5,
         )
         if AsyncAnthropic is None:
-            raise ImportError("anthropic is required: pip install engram_memory[anthropic]")
+            raise ImportError("anthropic is required: pip install engram-memory-sdk[anthropic]")
         kwargs: dict = {"api_key": api_key}
         if base_url:
             kwargs["base_url"] = base_url

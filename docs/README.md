@@ -5,7 +5,7 @@
 | Resource | Link |
 |----------|------|
 | **Repository** | [github.com/hackdavid/engram-memory](https://github.com/hackdavid/engram-memory) |
-| **Install** | Clone [hackdavid/engram-memory](https://github.com/hackdavid/engram-memory) and `pip install -e .` until PyPI release; then `pip install engram_memory` |
+| **Install** | Clone [hackdavid/engram-memory](https://github.com/hackdavid/engram-memory) and `pip install -e .` until PyPI release; then `pip install engram-memory-sdk` |
 | **License** | [MIT](https://github.com/hackdavid/engram-memory/blob/main/LICENSE) |
 
 ## Documentation map

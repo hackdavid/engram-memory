@@ -26,7 +26,7 @@ class OpenAILLM(BaseLLM):
             base_delay=0.5,
         )
         if AsyncOpenAI is None:
-            raise ImportError("openai is required: pip install engram_memory[openai]")
+            raise ImportError("openai is required: pip install engram-memory-sdk[openai]")
         self._client = AsyncOpenAI(api_key=api_key)
         self._model = model
 
