@@ -25,7 +25,7 @@ class OpenAIEmbedding(BaseEmbedding):
         base_url: str | None = None,
     ) -> None:
         if AsyncOpenAI is None:
-            raise ImportError("openai is required: pip install engram_memory[openai]")
+            raise ImportError("openai is required: pip install engram-memory-sdk[openai]")
         kwargs: dict = {"api_key": api_key}
         if base_url:
             kwargs["base_url"] = base_url

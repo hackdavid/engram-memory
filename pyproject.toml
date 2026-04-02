@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "engram_memory"
+name = "engram-memory-sdk"
 dynamic = ["version"]
 description = "A standalone, async-first graph memory SDK for AI applications. Neo4j-backed, LLM-driven dynamic schema."
 readme = "README.md"
@@ -47,8 +47,8 @@ openai-embed = ["openai>=1.0"]
 local-embed = ["sentence-transformers>=2.0", "torch"]
 observability = ["opentelemetry-api>=1.0"]
 all = [
-    "engram_memory[openai-embed]",
-    "engram_memory[observability]",
+    "engram-memory-sdk[openai-embed]",
+    "engram-memory-sdk[observability]",
 ]
 dev = [
     "pytest>=8.0",
@@ -64,6 +64,9 @@ Homepage = "https://github.com/hackdavid/engram-memory"
 Documentation = "https://github.com/hackdavid/engram-memory/tree/main/docs"
 Repository = "https://github.com/hackdavid/engram-memory"
 Issues = "https://github.com/hackdavid/engram-memory/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["engram_memory"]
 
 [tool.hatch.version]
 path = "engram_memory/_version.py"
